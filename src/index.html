@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<title>AI Usage Monitor</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <h1>مانیتور مصرف هوش مصنوعی</h1>
+  <div class="bar">
+    <select id="prov">
+      <option value="claude">Claude</option>
+      <option value="chatgpt">ChatGPT</option>
+      <option value="gemini">Gemini</option>
+      <option value="figma">Figma</option>
+    </select>
+    <input id="lbl" placeholder="نام اکانت (مثلاً Claude شخصی)">
+    <button id="add" class="primary">+ افزودن اکانت</button>
+    <button id="all">⟳ بروزرسانی همه</button>
+    <label class="iv">هر <input id="iv" type="number" min="1" max="120" value="5"> دقیقه</label>
+  </div>
+</header>
+<main id="list"></main>
+<script src="renderer.js"></script>
+</body>
+</html>

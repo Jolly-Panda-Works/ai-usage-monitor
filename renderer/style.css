@@ -1,0 +1,82 @@
+:root {
+  --bg: #0f1115; --panel: #171a21; --line: #262b36; --text: #e8eaf0; --muted: #8b93a7;
+  --ok: #3ecf8e; --warn: #f5b942; --bad: #ef5b5b; --info: #5b9cf5;
+  --claude: #d97757; --chatgpt: #10a37f; --gemini: #6e8cf5; --figma: #a259ff;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg); color: var(--text);
+  font: 14px/1.5 "Segoe UI", Tahoma, system-ui, sans-serif;
+}
+header {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 14px 20px; border-bottom: 1px solid var(--line); background: var(--panel);
+  position: sticky; top: 0; z-index: 5;
+}
+h1 { margin: 0; font-size: 18px; display: inline; }
+.title { display: flex; align-items: baseline; gap: 12px; }
+.tools { display: flex; align-items: center; gap: 10px; }
+.muted { color: var(--muted); font-size: 12px; }
+main { padding: 20px; }
+.empty { text-align: center; color: var(--muted); padding: 80px 0; }
+
+.btn, select, input, textarea {
+  background: #1e222b; color: var(--text); border: 1px solid var(--line); border-radius: 8px;
+  padding: 7px 12px; font: inherit;
+}
+.btn { cursor: pointer; }
+.btn:hover { border-color: #3a4152; }
+.btn.primary { background: #3b6df0; border-color: #3b6df0; }
+.btn.primary:hover { background: #4c7bf4; }
+.btn.icon { padding: 3px 9px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+.card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px;
+  border-top: 3px solid var(--accent, var(--line));
+}
+.card.claude { --accent: var(--claude); }
+.card.chatgpt { --accent: var(--chatgpt); }
+.card.gemini { --accent: var(--gemini); }
+.card.figma { --accent: var(--figma); }
+.chead { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 12px; }
+.cname { font-weight: 600; font-size: 15px; }
+.ctype { color: var(--muted); font-size: 12px; }
+.plan {
+  display: inline-block; margin-inline-start: 6px; padding: 0 8px; border-radius: 99px;
+  background: #232837; color: var(--muted); font-size: 11px; text-transform: capitalize;
+}
+.cbtns { display: flex; gap: 6px; }
+
+.meter { margin-bottom: 14px; }
+.mhead { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+.bar { height: 9px; background: #232837; border-radius: 99px; overflow: hidden; direction: ltr; }
+.bar i { display: block; height: 100%; border-radius: 99px; background: var(--ok); transition: width .4s; }
+.bar i.warn { background: var(--warn); }
+.bar i.bad { background: var(--bad); }
+.mfoot { display: flex; justify-content: space-between; gap: 8px; margin-top: 5px; color: var(--muted); font-size: 12px; }
+.mfoot .countdown { color: var(--text); direction: ltr; unicode-bidi: plaintext; }
+
+.badge { font-size: 12px; padding: 4px 10px; border-radius: 8px; display: inline-block; margin-bottom: 8px; }
+.badge.info { background: #1c2a44; color: var(--info); }
+.badge.limited { background: #3a2b12; color: var(--warn); }
+.badge.error { background: #3a1818; color: var(--bad); }
+.note { color: var(--muted); font-size: 12px; margin: 6px 0 0; }
+.note a { color: var(--info); cursor: pointer; text-decoration: underline; }
+.spin { color: var(--muted); }
+.foot { margin-top: 10px; color: var(--muted); font-size: 11px; }
+
+dialog {
+  background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 14px;
+  padding: 20px; width: min(560px, 92vw);
+}
+dialog::backdrop { background: rgba(0, 0, 0, .6); }
+dialog h2 { margin: 0 0 12px; font-size: 16px; }
+dialog label { display: block; margin-bottom: 12px; color: var(--muted); font-size: 12px; }
+dialog label select, dialog label input, dialog label textarea { display: block; width: 100%; margin-top: 4px; color: var(--text); }
+textarea { font-family: Consolas, monospace; font-size: 12px; resize: vertical; }
+.help { color: var(--muted); font-size: 12px; line-height: 1.7; margin: 0 0 12px; }
+.error { color: var(--bad); font-size: 12px; }
+.row { display: flex; gap: 8px; align-items: center; }
+.spacer { flex: 1; }

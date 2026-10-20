@@ -1,0 +1,29 @@
+{
+  "name": "ai-usage-monitor",
+  "version": "1.0.0",
+  "description": "AI Usage Monitor - Claude / ChatGPT / Gemini / Figma",
+  "main": "src/main.js",
+  "author": "Usef",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.usef.aiusagemonitor",
+    "productName": "AI Usage Monitor",
+    "directories": { "output": "dist" },
+    "files": ["src/**/*", "package.json"],
+    "win": { "target": ["nsis", "portable"] },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "AI-Usage-Monitor-Setup-${version}.${ext}"
+    },
+    "portable": { "artifactName": "AI-Usage-Monitor-Portable-${version}.${ext}" }
+  }
+}

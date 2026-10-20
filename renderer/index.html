@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+  <title>AI Usage Monitor</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="title">
+      <h1>AI Usage Monitor</h1>
+      <span id="lastUpdate" class="muted"></span>
+    </div>
+    <div class="tools">
+      <label class="muted">به‌روزرسانی خودکار
+        <select id="interval">
+          <option value="0">خاموش</option>
+          <option value="30">۳۰ ثانیه</option>
+          <option value="60" selected>۱ دقیقه</option>
+          <option value="300">۵ دقیقه</option>
+          <option value="900">۱۵ دقیقه</option>
+        </select>
+      </label>
+      <button id="refreshAll" class="btn">↻ همه</button>
+      <button id="addBtn" class="btn primary">+ افزودن اکانت</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="empty" class="empty" hidden>
+      هنوز اکانتی اضافه نشده. روی «افزودن اکانت» بزنید.
+    </div>
+    <div id="grid" class="grid"></div>
+  </main>
+
+  <dialog id="dlg">
+    <h2>افزودن اکانت</h2>
+    <label>نوع اکانت
+      <select id="fType"></select>
+    </label>
+    <label>نام نمایشی (مثلاً Claude شخصی)
+      <input id="fName" type="text" maxlength="60">
+    </label>
+    <label>اطلاعات اتصال
+      <textarea id="fInput" rows="6" spellcheck="false" dir="ltr"></textarea>
+    </label>
+    <p id="fHelp" class="help"></p>
+    <p id="fError" class="error" hidden></p>
+    <div class="row">
+      <button id="fLocal" class="btn" hidden>خواندن از این کامپیوتر</button>
+      <span class="spacer"></span>
+      <button id="fCancel" class="btn">انصراف</button>
+      <button id="fSave" class="btn primary">ذخیره</button>
+    </div>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
