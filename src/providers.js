@@ -1,4 +1,6 @@
-// هر provider یک خروجی استاندارد می‌دهد: { email, plan, note, windows:[{label, usedPct, resetsAt, used?, limit?}] }
+// Every provider returns: { email, plan, note, windows:[{label, usedPct, resetsAt, used?, limit?}] }
+// `label` uses canonical English names; the renderer translates them.
+// `note` is a code ('NO_USAGE' | 'NO_PLAN_USAGE' | 'MANUAL'), translated by the renderer.
 async function J(ses, url, headers = {}) {
   const r = await ses.fetch(url, {
     credentials: 'include',
@@ -20,17 +22,17 @@ const claude = {
     let email = null;
     try { email = (await J(ses, 'https://claude.ai/api/account')).email_address; } catch {}
     const map = [
-      ['five_hour', 'بازه ۵ ساعته'],
-      ['seven_day', 'بازه هفتگی'],
-      ['seven_day_opus', 'هفتگی Opus'],
-      ['seven_day_sonnet', 'هفتگی Sonnet']
+      ['five_hour', '5-hour'],
+      ['seven_day', 'Weekly'],
+      ['seven_day_opus', 'Weekly Opus'],
+      ['seven_day_sonnet', 'Weekly Sonnet']
     ];
     const windows = map.filter(([k]) => u[k]).map(([k, label]) => ({
       label,
       usedPct: Number(u[k].utilization) || 0,
       resetsAt: u[k].resets_at ? Date.parse(u[k].resets_at) : null
     }));
-    return { email, plan: org.name || null, windows, note: windows.length ? null : 'اطلاعات مصرف برای این اکانت برنگشت' };
+    return { email, plan: org.name || null, windows, note: windows.length ? null : 'NO_USAGE' };
   }
 };
 
@@ -45,23 +47,27 @@ const chatgpt = {
     try {
       u = await J(ses, 'https://chatgpt.com/backend-api/wham/usage', { Authorization: 'Bearer ' + s.accessToken });
     } catch (e) {
-      return { email, plan: null, windows: [], note: 'متصل است ولی ChatGPT اطلاعات مصرف را برای این پلن نداد (' + e.message + ')' };
+      return { email, plan: null, windows: [], note: 'NO_PLAN_USAGE' };
     }
     const rl = u.rate_limit || {};
     const mk = w => {
       if (!w) return null;
       const secs = w.limit_window_seconds;
-      let label = 'سهمیه';
-      if (secs) label = secs >= 86400 ? (secs === 604800 ? 'بازه هفتگی' : 'بازه ' + Math.round(secs / 86400) + ' روزه') : 'بازه ' + Math.round(secs / 3600) + ' ساعته';
+      let label = 'Quota';
+      if (secs) {
+        if (secs === 604800) label = 'Weekly';
+        else if (secs >= 86400) label = Math.round(secs / 86400) + '-day';
+        else label = Math.round(secs / 3600) + '-hour';
+      }
       const resetsAt = w.reset_at ? w.reset_at * 1000 : (w.reset_after_seconds != null ? Date.now() + w.reset_after_seconds * 1000 : null);
       return { label, usedPct: Number(w.used_percent) || 0, resetsAt };
     };
     const windows = [mk(rl.primary_window), mk(rl.secondary_window)].filter(Boolean);
-    return { email, plan: u.plan_type || null, windows, note: windows.length ? null : 'اطلاعات مصرف برنگشت' };
+    return { email, plan: u.plan_type || null, windows, note: windows.length ? null : 'NO_USAGE' };
   }
 };
 
-// Gemini و Figma API عمومی برای مصرف اکانت شخصی ندارند => شمارنده‌ی دستی با ریست خودکار
+// Gemini and Figma expose no public usage API for personal accounts => manual counter with automatic reset.
 const manual = (name, url, period) => ({
   name,
   loginUrl: url,
@@ -75,9 +81,8 @@ const manual = (name, url, period) => ({
       m.used = 0;
     }
     return {
-      email: null, plan: null, manual: true,
-      note: 'این سرویس API رسمی مصرف ندارد؛ شمارنده دستی است.',
-      windows: [{ label: m.label || 'سهمیه', usedPct: m.limit ? (m.used / m.limit) * 100 : 0, used: m.used, limit: m.limit, resetsAt: m.resetsAt }]
+      email: null, plan: null, manual: true, note: 'MANUAL',
+      windows: [{ label: m.label || 'Quota', usedPct: m.limit ? (m.used / m.limit) * 100 : 0, used: m.used, limit: m.limit, resetsAt: m.resetsAt }]
     };
   }
 });

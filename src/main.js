@@ -1,14 +1,21 @@
-const { app, BrowserWindow, ipcMain, session, Notification } = require('electron');
+const { app, BrowserWindow, ipcMain, session, Notification, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const providers = require('./providers');
 
+const ICON = path.join(__dirname, '..', 'assets', 'logo.png');
 let win;
-let store = { accounts: [], settings: { intervalMin: 5 } };
+let store = { accounts: [], settings: { intervalMin: 5, lang: 'en' } };
 const file = () => path.join(app.getPath('userData'), 'accounts.json');
 
 function load() {
-  try { store = { ...store, ...JSON.parse(fs.readFileSync(file(), 'utf8')) }; } catch {}
+  try {
+    const d = JSON.parse(fs.readFileSync(file(), 'utf8'));
+    store.accounts = d.accounts || [];
+    store.settings = { ...store.settings, ...(d.settings || {}) };
+  } catch {
+    store.settings.lang = app.getLocale().toLowerCase().startsWith('fa') ? 'fa' : 'en';
+  }
 }
 function save() { try { fs.writeFileSync(file(), JSON.stringify(store, null, 2)); } catch {} }
 function push() { if (win && !win.isDestroyed()) win.webContents.send('state', store); }
@@ -21,8 +28,7 @@ function sesFor(acc) {
   ses.setUserAgent(cleanUA());
   return ses;
 }
-
-function exhausted(d) { return d && d.windows && d.windows.some(w => w.usedPct >= 100); }
+const exhausted = d => d && d.windows && d.windows.some(w => w.usedPct >= 100);
 
 async function refresh(acc) {
   const prev = acc.data;
@@ -34,7 +40,12 @@ async function refresh(acc) {
   }
   acc.data.updatedAt = Date.now();
   if (exhausted(prev) && acc.data.windows && !exhausted(acc.data) && Notification.isSupported()) {
-    new Notification({ title: 'AI Usage Monitor', body: `${acc.label} دوباره قابل استفاده است ✅` }).show();
+    const fa = store.settings.lang === 'fa';
+    new Notification({
+      title: 'AI Usage Monitor',
+      body: fa ? `${acc.label} دوباره قابل استفاده است ✅` : `${acc.label} is available again ✅`,
+      icon: ICON
+    }).show();
   }
   save(); push();
 }
@@ -46,37 +57,40 @@ function schedule() {
   timer = setInterval(refreshAll, Math.max(1, store.settings.intervalMin) * 60 * 1000);
 }
 
+function lockLinks(w) {
+  w.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: 'deny' }; });
+}
+
 function createWindow() {
   win = new BrowserWindow({
-    width: 1050, height: 780, minWidth: 720, minHeight: 520,
-    title: 'AI Usage Monitor', backgroundColor: '#0f1115', autoHideMenuBar: true,
+    width: 1100, height: 760, minWidth: 780, minHeight: 540,
+    title: 'AI Usage Monitor', icon: ICON, backgroundColor: '#140f0c', autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false }
   });
+  lockLinks(win);
   win.loadFile(path.join(__dirname, 'index.html'));
 }
 
 function openLogin(acc) {
-  const p = providers[acc.provider];
   const w = new BrowserWindow({
-    width: 1000, height: 780, title: `ورود - ${acc.label}`, autoHideMenuBar: true,
+    width: 1000, height: 780, title: acc.label, icon: ICON, autoHideMenuBar: true,
     webPreferences: { partition: acc.partition, contextIsolation: true, nodeIntegration: false }
   });
   w.webContents.setUserAgent(cleanUA());
-  w.loadURL(p.loginUrl);
+  w.loadURL(providers[acc.provider].loginUrl);
   w.on('closed', () => refresh(acc));
 }
 
 const find = id => store.accounts.find(a => a.id === id);
 
 ipcMain.handle('state:get', () => store);
+ipcMain.handle('app:info', () => ({ version: app.getVersion() }));
 ipcMain.handle('account:add', (_e, { provider, label }) => {
   if (!providers[provider]) return;
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const acc = { id, provider, label: label || providers[provider].name, partition: 'persist:acct-' + id, data: null };
-  if (providers[provider].defaultPeriodHours) {
-    const ph = providers[provider].defaultPeriodHours;
-    acc.manual = { label: 'سهمیه', limit: 100, used: 0, periodHours: ph, resetsAt: Date.now() + ph * 3600e3 };
-  }
+  const ph = providers[provider].defaultPeriodHours;
+  if (ph) acc.manual = { label: 'Quota', limit: 100, used: 0, periodHours: ph, resetsAt: Date.now() + ph * 3600e3 };
   store.accounts.push(acc);
   save(); push();
   openLogin(acc);

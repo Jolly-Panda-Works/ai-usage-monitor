@@ -1,28 +1,65 @@
 <!doctype html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
 <title>AI Usage Monitor</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header>
-  <h1>مانیتور مصرف هوش مصنوعی</h1>
-  <div class="bar">
-    <select id="prov">
-      <option value="claude">Claude</option>
-      <option value="chatgpt">ChatGPT</option>
-      <option value="gemini">Gemini</option>
-      <option value="figma">Figma</option>
-    </select>
-    <input id="lbl" placeholder="نام اکانت (مثلاً Claude شخصی)">
-    <button id="add" class="primary">+ افزودن اکانت</button>
-    <button id="all">⟳ بروزرسانی همه</button>
-    <label class="iv">هر <input id="iv" type="number" min="1" max="120" value="5"> دقیقه</label>
+<header class="top">
+  <div class="brand">
+    <img src="../assets/logo.png" alt="" class="logo">
+    <span class="name">AI Usage Monitor</span>
+    <span class="ver" id="ver">v1.1.0</span>
   </div>
+  <nav class="actions">
+    <button class="ghost" id="all" data-i="refreshAll"></button>
+    <button class="ghost" id="settingsBtn"><span class="gear">⚙</span> <span data-i="settings"></span></button>
+  </nav>
 </header>
-<main id="list"></main>
+<div class="layout">
+  <aside>
+    <div class="cap" data-i="accounts"></div>
+    <ul id="nav"></ul>
+  </aside>
+  <section class="content">
+    <h2 data-i="overview"></h2>
+    <p class="sub" data-i="overviewSub"></p>
+    <div class="addbar">
+      <select id="prov">
+        <option value="claude">Claude</option>
+        <option value="chatgpt">ChatGPT</option>
+        <option value="gemini">Gemini</option>
+        <option value="figma">Figma</option>
+      </select>
+      <input id="lbl" data-ph="labelPh">
+      <button id="add" class="primary" data-i="addAccount"></button>
+    </div>
+    <div id="list" class="cards"></div>
+  </section>
+</div>
+
+<div id="modal" class="overlay hidden">
+  <div class="dialog">
+    <h3 data-i="settings"></h3>
+    <label class="field"><span data-i="language"></span>
+      <select id="lang"><option value="en">English</option><option value="fa">فارسی</option></select>
+    </label>
+    <label class="field"><span data-i="interval"></span>
+      <input id="iv" type="number" min="1" max="120" value="5">
+    </label>
+    <div class="about">
+      <div class="cap" data-i="about"></div>
+      <img src="../assets/logo.png" alt="" class="logo big">
+      <div><b>AI Usage Monitor</b> <span class="ver" id="ver2"></span></div>
+      <div class="muted"><span data-i="developer"></span>: Usef Farahmand</div>
+      <div class="muted"><a href="https://useffarahmand.com" target="_blank" rel="noopener">useffarahmand.com</a> · <a href="https://github.com/Jolly-Panda-Works/AIUsageMonitor" target="_blank" rel="noopener">GitHub</a></div>
+      <div class="muted">MIT License</div>
+    </div>
+    <div class="row-end"><button class="primary" id="closeModal" data-i="close"></button></div>
+  </div>
+</div>
 <script src="renderer.js"></script>
 </body>
 </html>

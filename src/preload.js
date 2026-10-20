@@ -2,6 +2,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 const inv = (c, a) => ipcRenderer.invoke(c, a);
 contextBridge.exposeInMainWorld('api', {
   getState: () => inv('state:get'),
+  appInfo: () => inv('app:info'),
   onState: cb => ipcRenderer.on('state', (_e, s) => cb(s)),
   add: (provider, label) => inv('account:add', { provider, label }),
   remove: id => inv('account:remove', id),
