@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "AI Usage Monitor Connector",
+  "version": "1.2.0",
+  "description": "Reports your Claude and ChatGPT usage from this browser to the AI Usage Monitor desktop app on your own PC. Nothing is sent anywhere else.",
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://claude.ai/*",
+    "https://chatgpt.com/*",
+    "http://127.0.0.1/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AI Usage Monitor"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

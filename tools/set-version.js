@@ -1,13 +1,17 @@
 #!/usr/bin/env node
-// Decides the build version and writes it into package.json (and $GITHUB_OUTPUT).
-//   tag  vX.Y.Z            -> X.Y.Z            (release)
-//   main / master          -> MAJOR.MINOR.<run number>   (release)
-//   any other branch/manual -> MAJOR.MINOR.0-dev.<run number>   (artifact only)
+// Decides the build version and writes it into package.json and extension/manifest.json.
+//   tag  vX.Y.Z             -> X.Y.Z                        (release; must be higher than the latest version)
+//   main / master           -> MAJOR.MINOR.<run number>      (release; always increases)
+//   any other branch/manual -> MAJOR.MINOR.0-dev.<run number> (no release)
 // MAJOR.MINOR come from package.json — bump them there to start a new release line.
+// Because the number only ever increases, every installer upgrades the previous one in place
+// and the in-app updater (electron-updater) can detect and install it.
 const fs = require('fs');
 const path = require('path');
 
-const pkgPath = path.join(__dirname, '..', 'package.json');
+const root = path.join(__dirname, '..');
+const pkgPath = path.join(root, 'package.json');
+const manPath = path.join(root, 'extension', 'manifest.json');
 const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
 const [major, minor] = pkg.version.split('.');
 const run = process.env.GITHUB_RUN_NUMBER || '0';
@@ -22,8 +26,13 @@ else { version = `${major}.${minor}.0-dev.${run}`; }
 
 pkg.version = version;
 fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
-console.log(`version=${version} release=${release}`);
 
-if (process.env.GITHUB_OUTPUT) {
-  fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${version}\nrelease=${release}\n`);
-}
+// Chrome extension versions must be numeric: 1.2.0-dev.5 -> 1.2.0.5
+try {
+  const man = JSON.parse(fs.readFileSync(manPath, 'utf8'));
+  man.version = version.replace(/-dev\.(\d+)$/, '.$1');
+  fs.writeFileSync(manPath, JSON.stringify(man, null, 2) + '\n');
+} catch {}
+
+console.log(`version=${version} release=${release}`);
+if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${version}\nrelease=${release}\n`);

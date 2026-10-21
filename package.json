@@ -1,6 +1,6 @@
 {
   "name": "ai-usage-monitor",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "AI Usage Monitor - Claude / ChatGPT / Gemini / Figma",
   "main": "src/main.js",
   "author": {
@@ -24,6 +24,7 @@
     },
     "files": [
       "src/**/*",
+      "extension/**/*",
       "assets/logo.png",
       "assets/logo.svg",
       "package.json"
@@ -40,11 +41,21 @@
       "allowToChangeInstallationDirectory": true,
       "artifactName": "AI-Usage-Monitor-Setup-${version}.${ext}",
       "installerIcon": "assets/icon.ico",
-      "uninstallerIcon": "assets/icon.ico"
+      "uninstallerIcon": "assets/icon.ico",
+      "perMachine": false,
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true
     },
     "portable": {
       "artifactName": "AI-Usage-Monitor-Portable-${version}.${ext}"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Jolly-Panda-Works",
+        "repo": "ai-usage-monitor"
+      }
+    ]
   },
   "homepage": "https://github.com/Jolly-Panda-Works/ai-usage-monitor#readme",
   "repository": {
@@ -65,5 +76,8 @@
     "electron",
     "windows",
     "monitor"
-  ]
+  ],
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  }
 }

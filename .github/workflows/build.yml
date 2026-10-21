@@ -50,6 +50,10 @@ jobs:
             "$h  $($_.Name)"
           } | Out-File -Encoding ascii dist/SHA256SUMS.txt
 
+      - name: Zip browser extension
+        shell: pwsh
+        run: Compress-Archive -Path extension/* -DestinationPath "dist/AI-Usage-Monitor-Connector-${{ steps.ver.outputs.version }}.zip"
+
       # Main output: a GitHub Release (does not use the Actions artifact quota).
       - name: Publish release
         if: steps.ver.outputs.release == 'true'
@@ -62,6 +66,9 @@ jobs:
           make_latest: true
           files: |
             dist/*.exe
+            dist/*.blockmap
+            dist/latest.yml
+            dist/AI-Usage-Monitor-Connector-*.zip
             dist/SHA256SUMS.txt
 
       # Only for non-release builds (other branches / manual runs). Never fails the job:
@@ -74,5 +81,6 @@ jobs:
           name: AI-Usage-Monitor-${{ steps.ver.outputs.version }}
           path: |
             dist/*.exe
+            dist/AI-Usage-Monitor-Connector-*.zip
             dist/SHA256SUMS.txt
           retention-days: 7

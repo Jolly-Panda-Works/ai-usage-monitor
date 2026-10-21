@@ -14,4 +14,4 @@ jobs:
         with:
           node-version: 20
       - name: Syntax check
-        run: for f in src/*.js; do node --check "$f"; done
+        run: for f in src/*.js extension/*.js tools/*.js; do node --check "$f"; done

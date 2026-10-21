@@ -1,44 +1,45 @@
-const { app, BrowserWindow, ipcMain, session, Notification, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, Notification, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const providers = require('./providers');
+const bridge = require('./bridge');
+
+let autoUpdater = null;
+try { autoUpdater = require('electron-updater').autoUpdater; } catch {}
 
 const ICON = path.join(__dirname, '..', 'assets', 'logo.png');
 let win;
-let store = { accounts: [], settings: { intervalMin: 5, lang: 'en' } };
+let bridgePort = null;
+let store = { accounts: [], settings: { lang: 'en' } };
 const file = () => path.join(app.getPath('userData'), 'accounts.json');
+
+const isProvider = k => !!(providers[k] && providers[k].name);
 
 function load() {
   try {
     const d = JSON.parse(fs.readFileSync(file(), 'utf8'));
-    store.accounts = d.accounts || [];
+    store.accounts = (d.accounts || []).filter(a => isProvider(a.provider));
     store.settings = { ...store.settings, ...(d.settings || {}) };
   } catch {
     store.settings.lang = app.getLocale().toLowerCase().startsWith('fa') ? 'fa' : 'en';
   }
+  for (const a of store.accounts) {
+    delete a.partition; // older versions used embedded sign-in sessions
+    if (providers[a.provider].kind === 'extension' && !a.token) a.token = crypto.randomBytes(24).toString('base64url');
+  }
 }
 function save() { try { fs.writeFileSync(file(), JSON.stringify(store, null, 2)); } catch {} }
-function push() { if (win && !win.isDestroyed()) win.webContents.send('state', store); }
+function publicState() {
+  return {
+    settings: store.settings,
+    accounts: store.accounts.map(({ token, ...a }) => ({ ...a, kind: providers[a.provider].kind }))
+  };
+}
+function push() { if (win && !win.isDestroyed()) win.webContents.send('state', publicState()); }
 
-function cleanUA() {
-  return app.userAgentFallback.replace(/ Electron\/\S+/, '').replace(/ ai-usage-monitor\/\S+/i, '').replace(/ AI-Usage-Monitor\/\S+/i, '');
-}
-function sesFor(acc) {
-  const ses = session.fromPartition(acc.partition);
-  ses.setUserAgent(cleanUA());
-  return ses;
-}
 const exhausted = d => d && d.windows && d.windows.some(w => w.usedPct >= 100);
-
-async function refresh(acc) {
-  const prev = acc.data;
-  try {
-    acc.data = await providers[acc.provider].fetch(sesFor(acc), acc);
-    acc.data.error = null;
-  } catch (e) {
-    acc.data = { ...(prev || {}), error: e.message };
-  }
-  acc.data.updatedAt = Date.now();
+function finish(prev, acc) {
   if (exhausted(prev) && acc.data.windows && !exhausted(acc.data) && Notification.isSupported()) {
     const fa = store.settings.lang === 'fa';
     new Notification({
@@ -49,16 +50,68 @@ async function refresh(acc) {
   }
   save(); push();
 }
-const refreshAll = () => Promise.all(store.accounts.map(refresh));
 
-let timer;
-function schedule() {
-  clearInterval(timer);
-  timer = setInterval(refreshAll, Math.max(1, store.settings.intervalMin) * 60 * 1000);
+function refreshManual(acc) {
+  const prev = acc.data;
+  acc.data = { ...providers.manualUsage(acc), error: null, updatedAt: Date.now() };
+  finish(prev, acc);
 }
 
-function lockLinks(w) {
-  w.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: 'deny' }; });
+function onUsage(acc, data) {
+  const prev = acc.data;
+  acc.lastSeen = Date.now();
+  if (data.error && !data.windows.length) acc.data = { ...(prev || {}), error: data.error };
+  else acc.data = { email: data.email, plan: data.plan, windows: data.windows, note: data.note, error: data.error || null };
+  acc.data.updatedAt = Date.now();
+  finish(prev, acc);
+}
+
+function findByToken(tok) {
+  const a = Buffer.from(String(tok));
+  for (const acc of store.accounts) {
+    if (!acc.token) continue;
+    const b = Buffer.from(acc.token);
+    if (a.length === b.length && crypto.timingSafeEqual(a, b)) return acc;
+  }
+  return null;
+}
+
+// ---- browser extension files: copied to a stable folder so "Load unpacked" keeps working ----
+function copyDir(src, dst) {
+  fs.mkdirSync(dst, { recursive: true });
+  for (const e of fs.readdirSync(src, { withFileTypes: true })) {
+    const s = path.join(src, e.name), d = path.join(dst, e.name);
+    if (e.isDirectory()) copyDir(s, d); else fs.writeFileSync(d, fs.readFileSync(s));
+  }
+}
+const extensionDir = () => path.join(app.getPath('userData'), 'extension');
+function installExtension() { try { copyDir(path.join(__dirname, '..', 'extension'), extensionDir()); } catch {} }
+
+// ---- auto-update (installer builds only) ----
+let upd = { status: 'idle' };
+function setUpd(s) { upd = s; if (win && !win.isDestroyed()) win.webContents.send('update', upd); }
+const canUpdate = () => autoUpdater && app.isPackaged && !process.env.PORTABLE_EXECUTABLE_FILE;
+function checkUpdates() { if (canUpdate()) autoUpdater.checkForUpdates().catch(() => setUpd({ status: 'error' })); }
+function initUpdater() {
+  if (!autoUpdater || !app.isPackaged) return setUpd({ status: 'dev' });
+  if (process.env.PORTABLE_EXECUTABLE_FILE) return setUpd({ status: 'portable' });
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.logger = null;
+  autoUpdater.on('checking-for-update', () => setUpd({ status: 'checking' }));
+  autoUpdater.on('update-available', i => setUpd({ status: 'downloading', version: i.version }));
+  autoUpdater.on('update-not-available', () => setUpd({ status: 'latest' }));
+  autoUpdater.on('download-progress', p => setUpd({ status: 'downloading', version: upd.version, percent: Math.round(p.percent) }));
+  autoUpdater.on('update-downloaded', i => {
+    setUpd({ status: 'ready', version: i.version });
+    if (Notification.isSupported()) {
+      const fa = store.settings.lang === 'fa';
+      new Notification({ title: 'AI Usage Monitor', body: fa ? `نسخه ${i.version} آماده نصب است؛ با بستن برنامه نصب می‌شود.` : `Version ${i.version} is ready — it installs when you quit the app.`, icon: ICON }).show();
+    }
+  });
+  autoUpdater.on('error', () => setUpd({ status: 'error' }));
+  checkUpdates();
+  setInterval(checkUpdates, 6 * 3600e3);
 }
 
 function createWindow() {
@@ -67,60 +120,68 @@ function createWindow() {
     title: 'AI Usage Monitor', icon: ICON, backgroundColor: '#140f0c', autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false }
   });
-  lockLinks(win);
+  win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: 'deny' }; });
+  win.webContents.on('will-navigate', e => e.preventDefault());
   win.loadFile(path.join(__dirname, 'index.html'));
-}
-
-function openLogin(acc) {
-  const w = new BrowserWindow({
-    width: 1000, height: 780, title: acc.label, icon: ICON, autoHideMenuBar: true,
-    webPreferences: { partition: acc.partition, contextIsolation: true, nodeIntegration: false }
-  });
-  w.webContents.setUserAgent(cleanUA());
-  w.loadURL(providers[acc.provider].loginUrl);
-  w.on('closed', () => refresh(acc));
 }
 
 const find = id => store.accounts.find(a => a.id === id);
 
-ipcMain.handle('state:get', () => store);
-ipcMain.handle('app:info', () => ({ version: app.getVersion() }));
+ipcMain.handle('state:get', () => publicState());
+ipcMain.handle('app:info', () => ({ version: app.getVersion(), bridgePort }));
 ipcMain.handle('account:add', (_e, { provider, label }) => {
-  if (!providers[provider]) return;
+  if (!isProvider(provider)) return null;
+  const p = providers[provider];
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  const acc = { id, provider, label: label || providers[provider].name, partition: 'persist:acct-' + id, data: null };
-  const ph = providers[provider].defaultPeriodHours;
-  if (ph) acc.manual = { label: 'Quota', limit: 100, used: 0, periodHours: ph, resetsAt: Date.now() + ph * 3600e3 };
+  const acc = { id, provider, label: String(label || p.name).slice(0, 60), data: null };
+  if (p.kind === 'extension') acc.token = crypto.randomBytes(24).toString('base64url');
+  else acc.manual = { label: 'Quota', limit: 100, used: 0, periodHours: p.defaultPeriodHours, resetsAt: Date.now() + p.defaultPeriodHours * 3600e3 };
   store.accounts.push(acc);
-  save(); push();
-  openLogin(acc);
+  if (acc.manual) refreshManual(acc); else { save(); push(); }
+  return { id, kind: p.kind };
 });
-ipcMain.handle('account:remove', async (_e, id) => {
-  const acc = find(id); if (!acc) return;
-  try { await session.fromPartition(acc.partition).clearStorageData(); } catch {}
-  store.accounts = store.accounts.filter(a => a.id !== id);
-  save(); push();
+ipcMain.handle('account:remove', (_e, id) => { store.accounts = store.accounts.filter(a => a.id !== id); save(); push(); });
+// Sign-in always happens in the user's own browser, never inside this app.
+ipcMain.handle('account:signin', (_e, id) => { const a = find(id); if (a) shell.openExternal(providers[a.provider].loginUrl); });
+ipcMain.handle('account:pairing', (_e, id) => {
+  const a = find(id);
+  if (!a || !a.token) return { error: 'NO_TOKEN' };
+  if (!bridgePort) return { error: 'PORT' };
+  const payload = { v: 1, p: bridgePort, t: a.token, s: a.provider, l: a.label };
+  return { code: 'AUM1.' + Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url') };
 });
-ipcMain.handle('account:login', (_e, id) => { const a = find(id); if (a) openLogin(a); });
-ipcMain.handle('account:refresh', (_e, id) => { const a = find(id); if (a) return refresh(a); });
-ipcMain.handle('refresh:all', () => refreshAll());
+ipcMain.handle('ext:open', () => { installExtension(); return shell.openPath(extensionDir()); });
 ipcMain.handle('manual:update', (_e, { id, patch }) => {
   const a = find(id); if (!a || !a.manual) return;
-  Object.assign(a.manual, patch);
-  return refresh(a);
+  const allowed = ['label', 'limit', 'used', 'periodHours', 'resetsAt'];
+  for (const k of allowed) if (k in patch) a.manual[k] = k === 'label' ? String(patch[k]).slice(0, 40) : Number(patch[k]) || 0;
+  refreshManual(a);
 });
 ipcMain.handle('manual:inc', (_e, { id, n }) => {
   const a = find(id); if (!a || !a.manual) return;
-  a.manual.used = Math.max(0, (a.manual.used || 0) + n);
-  return refresh(a);
+  a.manual.used = Math.max(0, (a.manual.used || 0) + (Number(n) || 0));
+  refreshManual(a);
 });
-ipcMain.handle('settings:set', (_e, patch) => { Object.assign(store.settings, patch); save(); schedule(); push(); });
+ipcMain.handle('settings:set', (_e, patch) => {
+  if (patch && (patch.lang === 'en' || patch.lang === 'fa')) store.settings.lang = patch.lang;
+  save(); push();
+});
+ipcMain.handle('update:state', () => upd);
+ipcMain.handle('update:check', () => checkUpdates());
+ipcMain.handle('update:install', () => { if (canUpdate()) autoUpdater.quitAndInstall(true, true); });
 
-app.whenReady().then(() => {
-  load();
-  createWindow();
-  schedule();
-  setTimeout(refreshAll, 800);
-  setInterval(() => store.accounts.filter(a => a.manual).forEach(refresh), 60 * 1000);
-});
-app.on('window-all-closed', () => app.quit());
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); } });
+  app.whenReady().then(async () => {
+    load();
+    installExtension();
+    const b = await bridge.start({ findByToken, onUsage });
+    bridgePort = b ? b.port : null;
+    createWindow();
+    initUpdater();
+    setInterval(() => { store.accounts.filter(a => a.manual).forEach(refreshManual); push(); }, 60 * 1000);
+  });
+  app.on('window-all-closed', () => app.quit());
+}

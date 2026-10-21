@@ -11,10 +11,9 @@
   <div class="brand">
     <img src="../assets/logo.png" alt="" class="logo">
     <span class="name">AI Usage Monitor</span>
-    <span class="ver" id="ver">v1.1.0</span>
+    <span class="ver" id="ver">v1.2.0</span>
   </div>
   <nav class="actions">
-    <button class="ghost" id="all" data-i="refreshAll"></button>
     <button class="ghost" id="settingsBtn"><span class="gear">⚙</span> <span data-i="settings"></span></button>
   </nav>
 </header>
@@ -40,19 +39,29 @@
   </section>
 </div>
 
+<div id="connect" class="overlay hidden">
+  <div class="dialog wide">
+    <h3 id="cTitle"></h3>
+    <div id="cBody"></div>
+    <div class="row-end"><button class="primary" id="cClose" data-i="done"></button></div>
+  </div>
+</div>
+
 <div id="modal" class="overlay hidden">
   <div class="dialog">
     <h3 data-i="settings"></h3>
     <label class="field"><span data-i="language"></span>
       <select id="lang"><option value="en">English</option><option value="fa">فارسی</option></select>
     </label>
-    <label class="field"><span data-i="interval"></span>
-      <input id="iv" type="number" min="1" max="120" value="5">
-    </label>
     <div class="about">
       <div class="cap" data-i="about"></div>
       <img src="../assets/logo.png" alt="" class="logo big">
       <div><b>AI Usage Monitor</b> <span class="ver" id="ver2"></span></div>
+      <div class="muted" id="updText"></div>
+      <div class="q">
+        <button id="updCheck" data-i="checkUpdates"></button>
+        <button id="updInstall" class="primary hidden" data-i="restartUpdate"></button>
+      </div>
       <div class="muted"><span data-i="developer"></span>: Usef Farahmand</div>
       <div class="muted"><a href="https://useffarahmand.com" target="_blank" rel="noopener">useffarahmand.com</a> · <a href="https://github.com/Jolly-Panda-Works/ai-usage-monitor" target="_blank" rel="noopener">GitHub</a></div>
       <div class="muted">MIT License</div>

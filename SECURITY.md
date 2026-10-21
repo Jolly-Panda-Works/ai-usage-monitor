@@ -10,4 +10,4 @@ Please **do not** open a public issue. Use GitHub's private reporting:
 Include steps to reproduce and the impact. You will get a response as soon as possible.
 
 ## Scope notes
-The app stores browser session cookies for the accounts you connect (see [PRIVACY.md](PRIVACY.md)). Issues that could expose those sessions to other apps or websites are especially important.
+The app receives usage numbers from the browser extension on `127.0.0.1` using a per-account token (see [PRIVACY.md](PRIVACY.md)). Issues that could let other apps or websites read or spoof that data, or leak the pairing tokens, are especially important.
