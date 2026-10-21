@@ -13,6 +13,8 @@ Requirements: Node.js 20+, Windows (the packaged app targets Windows; developmen
 
 ## Project layout
 - `src/providers.js` — usage fetchers for Claude / ChatGPT (**most contributions go here**: new service, fixed endpoint), service metadata and the Free-quota tracker logic.
+- `extension/` — Chromium extension: `fetchers.js` (same endpoints as `providers.js`; keep them in sync), `background.js` (sync, stored accounts, badge), `popup.*` (dashboard). Load the folder unpacked in Chrome to test.
+- `src/bridge.js` — token-protected `127.0.0.1` receiver for the extension.
 - `src/main.js` — windows, per-account sessions and sign-in window, accounts, updater, notifications.
 - `src/renderer.js`, `index.html`, `styles.css` — UI and translations (`I18N` object).
 
@@ -28,4 +30,4 @@ Requirements: Node.js 20+, Windows (the packaged app targets Windows; developmen
 - CI runs a syntax check; please also run the app once with `npm start`.
 
 ## Releases & versions
-Pushes to `main` build and publish a release automatically. The version is `MAJOR.MINOR.<build number>`; to start a new line, change `MAJOR.MINOR` in `package.json` (the patch part is overwritten by CI). The number only ever increases so updates install over each other and the in-app updater can find them. Docs-only changes (`*.md`, `docs/`) don't trigger a build.
+Pushes to `main` build and publish a release automatically. The version is `MAJOR.MINOR.<build number>`; to start a new line, change `MAJOR.MINOR` in `package.json` (the patch part is overwritten by CI; the extension manifest follows). The number only ever increases so updates install over each other and the in-app updater can find them. Docs-only changes (`*.md`, `docs/`) don't trigger a build.

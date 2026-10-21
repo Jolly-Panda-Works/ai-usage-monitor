@@ -4,6 +4,15 @@ All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
 ## [Unreleased]
+## [1.4.0]
+### Added
+- **Browser extension is back** (`extension/`), now also a **standalone monitor**: the popup lists every Claude / ChatGPT account the browser is signed in with (plan, e-mail, usage bars, reset countdowns), remembers accounts it has seen, lets you rename / remove them, switches between English and Persian (RTL), shows the highest usage on the toolbar badge and notifies when a limit resets. Refresh interval is configurable.
+- Optional **desktop link**: the **🧩 Extension** button on an account card shows a pairing code; the extension then also reports to the app over the token-protected `127.0.0.1` bridge. A *Linked* chip appears on the card; fresh extension data is kept when the in-app session is not signed in.
+- The extension zip is attached to releases again.
+### Changed
+- In-app sign-in and the cookie sign-in stay as they were in 1.3.0 — the extension is an addition, not a replacement.
+### Removed
+- The accidentally committed `ai-usage-monitor.zip` snapshot (zip files are now git-ignored).
 ## [1.3.0]
 ### Changed
 - **No browser extension any more.** Claude and ChatGPT accounts sign in inside the app again (separate, isolated session per account) and usage is read from that session.

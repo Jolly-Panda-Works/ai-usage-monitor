@@ -21,7 +21,8 @@ If you use several AI accounts you constantly wonder: *which one still has quota
 
 ## Features
 - Multiple accounts per service (e.g. several Claude accounts), each with its own isolated sign-in.
-- **Sign in inside the app** — no browser extension, nothing to install in your browser. If a site blocks sign-in inside embedded windows (e.g. “Continue with Google”), paste the session cookie instead.
+- **Sign in inside the app** — nothing to install in your browser. If a site blocks sign-in inside embedded windows (e.g. “Continue with Google”), paste the session cookie instead.
+- **Browser extension (optional, works on its own):** its popup lists the Claude / ChatGPT accounts your browser is signed in with — usage bars, reset countdowns, plan, e-mail — remembers accounts it has seen, shows the highest usage on the toolbar badge and notifies when a limit resets. It can also report to the desktop app. English and Persian (RTL).
 - Used %, remaining % and a live **reset countdown** for every limit window the service reports (5-hour, weekly, …).
 - **Free-plan quota tracker** for every service: see used / remaining **tokens** (or messages, credits), the limit you know, and a live **reset countdown** — even when the service shows nothing for Free accounts.
 - Windows notification when a limit resets.
@@ -46,6 +47,13 @@ Each Claude / ChatGPT account gets its own private browser session **inside the 
 1. Press **Add account**, choose **Claude** or **ChatGPT**, give it a name and press **Add account**. A sign-in window opens.
 2. Sign in there (e-mail code / password). Close the window — the card fills in within seconds. Press **Sign in** on a card any time to open the window again.
 3. **Google sign-in blocked?** Some sites refuse Google sign-in inside embedded windows. Press **Can’t sign in (e.g. Google)? Use a cookie** on the card, sign in in your normal browser, copy the session cookie (`sessionKey` for Claude, `__Secure-next-auth.session-token` for ChatGPT; DevTools → Application → Cookies) and paste it. It is stored only inside the app, for that account.
+
+## Browser extension
+A Chromium extension (Chrome / Edge / Brave) lives in [`extension/`](extension/README.md) and is attached to every release as `AI-Usage-Monitor-Connector-<version>.zip`.
+
+- **Standalone:** click the toolbar icon to see your accounts and usage — no desktop app needed. Sign in to claude.ai / chatgpt.com in that browser and the account appears by itself; accounts you used before stay listed (greyed out) with their last numbers.
+- **With the desktop app:** on an account card press **🧩 Extension**, install the extension (*Open extension folder* → `chrome://extensions` → *Developer mode* → *Load unpacked*), then paste the code under *Desktop app link*. The extension then also sends its numbers to the app (local `127.0.0.1` only).
+- One browser profile = one signed-in account per service. For several accounts use a separate browser profile for each (every profile can have the extension).
 
 **Gemini and Figma** have no usage API for personal accounts, so they use the quota tracker below; the *Open site* button opens the site in your browser.
 

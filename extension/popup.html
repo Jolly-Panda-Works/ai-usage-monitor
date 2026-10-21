@@ -1,11 +1,36 @@
 <!doctype html>
-<html><head><meta charset="utf-8"><link rel="stylesheet" href="popup.css"></head>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <title>AI Usage Monitor</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
 <body>
-  <div class="head"><img src="icons/icon32.png" alt=""><b>AI Usage Monitor</b></div>
-  <p class="hint">In the desktop app press <b>Connect</b> on an account, copy the code and paste it here.</p>
-  <textarea id="code" placeholder="AUM1.…"></textarea>
-  <div class="row"><button id="add" class="primary">Connect</button><button id="now">Send now</button></div>
-  <div id="msg"></div>
-  <div id="links"></div>
+  <div class="head">
+    <img src="icons/icon32.png" alt=""><b>AI Usage Monitor</b>
+    <span class="grow"></span>
+    <button id="refresh" class="icon" title="Refresh">⟳</button>
+  </div>
+  <div id="status" class="status"></div>
+  <div id="accounts"></div>
+
+  <details id="settings"><summary id="tSettings"></summary>
+    <div class="grid">
+      <label><span id="tLang"></span>
+        <select id="lang"><option value="en">English</option><option value="fa">فارسی</option></select></label>
+      <label><span id="tInterval"></span>
+        <select id="interval"><option>1</option><option>5</option><option>10</option><option>15</option><option>30</option><option>60</option></select></label>
+      <label class="check"><input type="checkbox" id="notify"><span id="tNotify"></span></label>
+    </div>
+  </details>
+
+  <details id="desktop"><summary id="tDesktop"></summary>
+    <p class="hint" id="tDesktopHint"></p>
+    <textarea id="code" placeholder="AUM1.…" spellcheck="false"></textarea>
+    <div class="row"><button id="add" class="primary"></button></div>
+    <div id="msg"></div>
+    <div id="links"></div>
+  </details>
   <script src="popup.js"></script>
-</body></html>
+</body>
+</html>

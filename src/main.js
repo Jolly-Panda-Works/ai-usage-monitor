@@ -1,13 +1,17 @@
 const { app, BrowserWindow, ipcMain, session, Notification, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const providers = require('./providers');
+const bridge = require('./bridge');
 
 let autoUpdater = null;
 try { autoUpdater = require('electron-updater').autoUpdater; } catch {}
 
 const ICON = path.join(__dirname, '..', 'assets', 'logo.png');
 let win;
+let bridgePort = null;
+const LINK_MS = 60 * 60 * 1000;          // an account counts as "linked" while its extension reported within the last hour
 let store = { accounts: [], settings: { lang: 'en', intervalMin: 5 } };
 const file = () => path.join(app.getPath('userData'), 'accounts.json');
 
@@ -24,9 +28,8 @@ function load() {
     store.settings.lang = app.getLocale().toLowerCase().startsWith('fa') ? 'fa' : 'en';
   }
   for (const a of store.accounts) {
-    delete a.token; delete a.lastSeen;                       // leftovers of the browser-extension build (1.2.x)
     if (isSession(a)) a.partition = a.partition || 'persist:acct-' + a.id;
-    else { delete a.partition; a.data = null; }
+    else { delete a.partition; delete a.token; delete a.lastSeen; a.data = null; }
     if (a.manual) {                                          // old manual counter -> tracker
       const m = a.manual, base = providers.newTracker(a.provider);
       a.tracker = { ...base, label: m.label || base.label, limit: m.limit, used: m.used, periodHours: m.periodHours, resetsAt: m.resetsAt };
@@ -38,11 +41,13 @@ function load() {
 }
 function save() { try { fs.writeFileSync(file(), JSON.stringify(store, null, 2)); } catch {} }
 
+const isLinked = a => !!(a.token && a.lastSeen && Date.now() - a.lastSeen < LINK_MS);
+
 function publicState() {
   return {
     settings: store.settings,
-    accounts: store.accounts.map(({ partition, ...a }) => ({
-      ...a, kind: providers[a.provider].kind, tw: providers.trackerWindow(a.tracker)
+    accounts: store.accounts.map(({ partition, token, ...a }) => ({
+      ...a, kind: providers[a.provider].kind, linked: isLinked({ token, lastSeen: a.lastSeen }), tw: providers.trackerWindow(a.tracker)
     }))
   };
 }
@@ -86,11 +91,44 @@ async function refresh(acc) {
   try {
     acc.data = { ...(await providers[acc.provider].fetch(sesFor(acc))), error: null };
   } catch (e) {
-    acc.data = { ...(prev || {}), error: String((e && e.message) || e).slice(0, 80) };
+    // Fresh numbers from the browser extension win over an in-app session that is not signed in.
+    const viaExt = isLinked(acc) && prev && prev.windows && prev.windows.length && !prev.error;
+    acc.data = { ...(prev || {}), error: viaExt ? null : String((e && e.message) || e).slice(0, 80) };
   }
   acc.data.updatedAt = Date.now();
   finish(acc);
 }
+
+// ---------------------------------------------------------------- browser extension (optional link)
+function onUsage(acc, data) {
+  const prev = acc.data;
+  acc.lastSeen = Date.now();
+  if (data.error && !data.windows.length) acc.data = { ...(prev || {}), error: data.error };
+  else acc.data = { email: data.email, plan: data.plan, windows: data.windows, note: data.note, error: data.error || null };
+  acc.data.updatedAt = Date.now();
+  finish(acc);
+}
+
+function findByToken(tok) {
+  const a = Buffer.from(String(tok));
+  for (const acc of store.accounts) {
+    if (!acc.token) continue;
+    const b = Buffer.from(acc.token);
+    if (a.length === b.length && crypto.timingSafeEqual(a, b)) return acc;
+  }
+  return null;
+}
+
+// The extension is copied to a stable folder so "Load unpacked" keeps working after app updates.
+function copyDir(src, dst) {
+  fs.mkdirSync(dst, { recursive: true });
+  for (const e of fs.readdirSync(src, { withFileTypes: true })) {
+    const s = path.join(src, e.name), d = path.join(dst, e.name);
+    if (e.isDirectory()) copyDir(s, d); else fs.writeFileSync(d, fs.readFileSync(s));
+  }
+}
+const extensionDir = () => path.join(app.getPath('userData'), 'extension');
+function installExtension() { try { copyDir(path.join(__dirname, '..', 'extension'), extensionDir()); } catch {} }
 const refreshAll = () => Promise.all(store.accounts.map(refresh));
 
 let timer;
@@ -158,7 +196,7 @@ const find = id => store.accounts.find(a => a.id === id);
 const withTracker = (id, fn) => { const a = find(id); if (!a || !a.tracker || !a.tracker.enabled) return; fn(a.tracker, Date.now()); finish(a); };
 
 ipcMain.handle('state:get', () => publicState());
-ipcMain.handle('app:info', () => ({ version: app.getVersion() }));
+ipcMain.handle('app:info', () => ({ version: app.getVersion(), bridgePort }));
 
 ipcMain.handle('account:add', (_e, { provider, label }) => {
   if (!isProvider(provider)) return null;
@@ -187,6 +225,17 @@ ipcMain.handle('account:signin', (_e, id) => {
   if (isSession(a)) openLogin(a); else shell.openExternal(providers[a.provider].loginUrl);
 });
 ipcMain.handle('account:browser', (_e, id) => { const a = find(id); if (a) shell.openExternal(providers[a.provider].loginUrl); });
+
+// Pairing code for the browser extension (Claude / ChatGPT accounts). The token is created on first use.
+ipcMain.handle('account:pairing', (_e, id) => {
+  const a = find(id);
+  if (!a || !isSession(a)) return { error: 'NO_TOKEN' };
+  if (!bridgePort) return { error: 'PORT' };
+  if (!a.token) { a.token = crypto.randomBytes(24).toString('base64url'); save(); }
+  const payload = { v: 1, p: bridgePort, t: a.token, s: a.provider, l: a.label };
+  return { code: 'AUM1.' + Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url') };
+});
+ipcMain.handle('ext:open', () => { installExtension(); return shell.openPath(extensionDir()); });
 ipcMain.handle('account:refresh', (_e, id) => { const a = find(id); if (a) return refresh(a); });
 ipcMain.handle('refresh:all', () => refreshAll());
 
@@ -238,8 +287,11 @@ if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
   app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); } });
-  app.whenReady().then(() => {
+  app.whenReady().then(async () => {
     load();
+    installExtension();
+    const b = await bridge.start({ findByToken, onUsage });
+    bridgePort = b ? b.port : null;
     createWindow();
     initUpdater();
     schedule();

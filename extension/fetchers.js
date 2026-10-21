@@ -2,10 +2,25 @@
 // Each fetcher returns { email, plan, windows:[{label, usedPct, resetsAt}], note }.
 // Endpoints are undocumented website endpoints and may change without notice.
 async function J(url, headers = {}) {
-  const r = await fetch(url, { credentials: 'include', headers: { Accept: 'application/json', ...headers } });
-  if (r.status === 401 || r.status === 403) throw new Error('NOT_LOGGED_IN');
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  return r.json();
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 15000);
+  try {
+    const r = await fetch(url, { credentials: 'include', signal: ctl.signal, headers: { Accept: 'application/json', ...headers } });
+    if (r.status === 401 || r.status === 403) throw new Error('NOT_LOGGED_IN');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.json();
+  } catch (e) {
+    if (e && e.name === 'AbortError') throw new Error('TIMEOUT');
+    throw e;
+  } finally { clearTimeout(timer); }
+}
+
+function claudePlan(org) {
+  const caps = org.capabilities || [];
+  if (caps.includes('claude_max')) return 'Max';
+  if (caps.includes('claude_pro')) return 'Pro';
+  if (caps.includes('raven')) return 'Team';
+  return org.rate_limit_tier || org.billing_type || null;
 }
 
 const FETCHERS = {
@@ -13,22 +28,23 @@ const FETCHERS = {
     const orgs = await J('https://claude.ai/api/organizations');
     if (!Array.isArray(orgs) || !orgs.length) throw new Error('NOT_LOGGED_IN');
     const org = orgs.find(o => (o.capabilities || []).includes('chat')) || orgs[0];
-    const u = await J(`https://claude.ai/api/organizations/${org.uuid}/usage`);
+    const u = (await J(`https://claude.ai/api/organizations/${org.uuid}/usage`)) || {};
     let email = null;
     try { email = (await J('https://claude.ai/api/account')).email_address; } catch {}
     const map = [['five_hour', '5-hour'], ['seven_day', 'Weekly'], ['seven_day_opus', 'Weekly Opus'], ['seven_day_sonnet', 'Weekly Sonnet']];
-    const windows = map.filter(([k]) => u[k]).map(([k, label]) => ({
+    // Free accounts normally come back with every window set to null -> no windows -> NO_USAGE.
+    const windows = map.filter(([k]) => u[k] && typeof u[k] === 'object').map(([k, label]) => ({
       label,
       usedPct: Number(u[k].utilization) || 0,
       resetsAt: u[k].resets_at ? Date.parse(u[k].resets_at) : null
     }));
-    return { email, plan: org.name || null, windows, note: windows.length ? null : 'NO_USAGE' };
+    return { email, plan: claudePlan(org) || org.name || null, windows, note: windows.length ? null : 'NO_USAGE' };
   },
 
   async chatgpt() {
     const s = await J('https://chatgpt.com/api/auth/session');
     if (!s || !s.accessToken) throw new Error('NOT_LOGGED_IN');
-    const email = s.user && s.user.email;
+    const email = (s.user && s.user.email) || null;
     let u;
     try {
       u = await J('https://chatgpt.com/backend-api/wham/usage', { Authorization: 'Bearer ' + s.accessToken });

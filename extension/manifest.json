@@ -1,11 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "AI Usage Monitor Connector",
-  "version": "1.2.0",
-  "description": "Reports your Claude and ChatGPT usage from this browser to the AI Usage Monitor desktop app on your own PC. Nothing is sent anywhere else.",
+  "name": "AI Usage Monitor",
+  "version": "1.4.0",
+  "description": "See your Claude and ChatGPT accounts, usage and reset times right in the browser. Optionally reports to the AI Usage Monitor desktop app on your own PC. Nothing is sent anywhere else.",
   "permissions": [
     "storage",
-    "alarms"
+    "alarms",
+    "notifications"
   ],
   "host_permissions": [
     "https://claude.ai/*",

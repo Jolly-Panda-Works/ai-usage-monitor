@@ -3,7 +3,7 @@ const I18N = {
     refreshAll: '⟳ Refresh all', settings: 'Settings', accounts: 'Accounts', all: 'All accounts',
     overview: 'Usage overview', overviewSub: 'Live usage, token counts and reset times for all your AI accounts — including Free plans.',
     labelPh: 'Account name (e.g. Claude personal)', addAccount: '+ Add account',
-    empty: 'No accounts yet.<br>Pick a service and press “Add account” — a sign-in window will open inside the app.',
+    empty: 'No accounts yet.<br>Pick a service and press “Add account” — a sign-in window will open inside the app. Or link the browser extension from the account card.',
     signIn: 'Sign in', openSite: 'Open site', refresh: 'Refresh', remove: 'Remove',
     confirmRemove: 'Remove this account?', used: 'Used', left: 'Left',
     resetsIn: 'Resets in', availableIn: 'Available again in', resetUnknown: 'Reset time unknown',
@@ -34,6 +34,17 @@ const I18N = {
     w: { '5-hour': '5-hour window', 'Weekly': 'Weekly window', 'Weekly Opus': 'Weekly Opus', 'Weekly Sonnet': 'Weekly Sonnet', 'Quota': 'Quota' },
     hour: '-hour window', day: '-day window',
     d: 'd', h: 'h', m: 'm', s: 's', now: 'now', done: 'Done',
+    extBtn: 'Extension', linked: 'Extension linked',
+    notLoggedInExt: 'The browser extension reports that you are not signed in on that browser. Sign in there (or use “Sign in” here).',
+    extTitle: 'Link the browser extension to {service}',
+    extStep1: 'Sign in to {service} in your own browser (Chrome, Edge or Brave) — any method works, including Google and passkeys.',
+    signInBrowser: 'Open sign-in page in my browser',
+    extStep2: 'Install the extension once: open the folder below, then in your browser go to chrome://extensions, turn on “Developer mode”, press “Load unpacked” and pick that folder.',
+    openFolder: 'Open extension folder',
+    extStep3: 'Click the extension icon, open “Desktop link”, paste this code and press Connect. For several accounts, use a separate browser profile for each and paste that account’s own code.',
+    copyCode: 'Copy code', copied: 'Copied ✓',
+    extNote: 'The extension reads your usage inside your browser and sends it only to this app on your PC. It also works on its own: its popup shows your accounts and usage even without this app.',
+    portBusy: 'The local connection port is busy. Close other copies of the app and restart it.',
     checkUpdates: 'Check for updates', restartUpdate: 'Restart and update',
     u_idle: '', u_checking: 'Checking for updates…', u_latest: 'You have the latest version.',
     u_downloading: 'Downloading update {v}{p}…', u_ready: 'Update {v} is ready.', u_error: 'Update check failed.',
@@ -43,7 +54,7 @@ const I18N = {
     refreshAll: '⟳ بروزرسانی همه', settings: 'تنظیمات', accounts: 'اکانت‌ها', all: 'همه اکانت‌ها',
     overview: 'نمای کلی مصرف', overviewSub: 'مصرف لحظه‌ای، تعداد توکن و زمان ریست همه اکانت‌های هوش مصنوعی شما — از جمله پلن‌های Free.',
     labelPh: 'نام اکانت (مثلاً Claude شخصی)', addAccount: '+ افزودن اکانت',
-    empty: 'هنوز اکانتی اضافه نشده.<br>یک سرویس انتخاب کن و «افزودن اکانت» را بزن؛ پنجره ورود داخل خود برنامه باز می‌شود.',
+    empty: 'هنوز اکانتی اضافه نشده.<br>یک سرویس انتخاب کن و «افزودن اکانت» را بزن؛ پنجره ورود داخل خود برنامه باز می‌شود. یا از کارت اکانت، افزونهٔ مرورگر را متصل کن.',
     signIn: 'ورود', openSite: 'باز کردن سایت', refresh: 'بروزرسانی', remove: 'حذف',
     confirmRemove: 'این اکانت حذف شود؟', used: 'مصرف', left: 'باقی‌مانده',
     resetsIn: 'ریست تا', availableIn: 'قابل استفاده تا', resetUnknown: 'زمان ریست نامشخص',
@@ -74,6 +85,17 @@ const I18N = {
     w: { '5-hour': 'بازه ۵ ساعته', 'Weekly': 'بازه هفتگی', 'Weekly Opus': 'هفتگی Opus', 'Weekly Sonnet': 'هفتگی Sonnet', 'Quota': 'سهمیه' },
     hour: ' ساعته', day: ' روزه',
     d: ' روز', h: ' ساعت', m: ' دقیقه', s: ' ثانیه', now: 'همین الان', done: 'تمام',
+    extBtn: 'افزونه', linked: 'افزونه متصل است',
+    notLoggedInExt: 'افزونهٔ مرورگر گزارش می‌دهد که در آن مرورگر وارد حساب نشده‌ای. همان‌جا وارد شو (یا اینجا «ورود» را بزن).',
+    extTitle: 'اتصال افزونهٔ مرورگر به {service}',
+    extStep1: 'داخل مرورگر خودت (Chrome، Edge یا Brave) وارد {service} شو؛ هر روشی (حتی گوگل و passkey) جواب می‌دهد.',
+    signInBrowser: 'باز کردن صفحه ورود در مرورگر من',
+    extStep2: 'افزونه را یک‌بار نصب کن: پوشه زیر را باز کن، سپس در مرورگر به chrome://extensions برو، «Developer mode» را روشن کن، «Load unpacked» را بزن و همان پوشه را انتخاب کن.',
+    openFolder: 'باز کردن پوشه افزونه',
+    extStep3: 'روی آیکن افزونه کلیک کن، بخش «اتصال به برنامه دسکتاپ» را باز کن، این کد را بچسبان و Connect را بزن. برای چند اکانت، برای هر اکانت یک پروفایل مرورگر جدا استفاده کن و کد همان اکانت را بچسبان.',
+    copyCode: 'کپی کد', copied: 'کپی شد ✓',
+    extNote: 'افزونه مصرف را داخل مرورگر خودت می‌خواند و فقط به همین اپ روی کامپیوترت می‌فرستد. افزونه مستقل هم کار می‌کند: پاپ‌آپ آن بدون این اپ هم اکانت‌ها و مصرف را نشان می‌دهد.',
+    portBusy: 'پورت اتصال محلی اشغال است. نسخه‌های دیگر اپ را ببند و دوباره اجرا کن.',
     checkUpdates: 'بررسی آپدیت', restartUpdate: 'راه‌اندازی مجدد و آپدیت',
     u_idle: '', u_checking: 'در حال بررسی آپدیت…', u_latest: 'آخرین نسخه را داری.',
     u_downloading: 'در حال دانلود آپدیت {v}{p}…', u_ready: 'آپدیت {v} آماده است.', u_error: 'بررسی آپدیت ناموفق بود.',
@@ -192,13 +214,13 @@ function cardHtml(a) {
   const t = T(), d = a.data || {}, session = a.kind === 'session';
   const wins = d.windows || [];
   let err = '';
-  if (d.error === 'NOT_LOGGED_IN') err = `<div class="err">${t.notLoggedIn}</div>`;
+  if (d.error === 'NOT_LOGGED_IN') err = `<div class="err">${a.linked ? t.notLoggedInExt : t.notLoggedIn}</div>`;
   else if (d.error === 'CLOUDFLARE') err = `<div class="err">${t.cloudflare}</div>`;
   else if (d.error) err = `<div class="err">${t.error}: ${esc(d.error)}</div>`;
   const sub = [d.email, d.plan].filter(Boolean).join(' · ');
   const x = `<button data-act="remove" title="${t.remove}">✕</button>`;
   const buttons = session
-    ? `<button data-act="signin">${t.signIn}</button><button data-act="refresh">${t.refresh}</button>${x}`
+    ? `<button data-act="signin">${t.signIn}</button><button data-act="ext">🧩 ${t.extBtn}</button><button data-act="refresh">${t.refresh}</button>${x}`
     : `<button data-act="site">${t.openSite}</button>${x}`;
   const cookie = session && (!a.data || d.error) ? `<div class="q"><button class="link" data-act="cookie">${t.cookieLink}</button></div>` : '';
   const note = !d.error && d.note && t[d.note] ? `<div class="note">${t[d.note]}</div>` : '';
@@ -206,7 +228,7 @@ function cardHtml(a) {
   const trackerOn = session && !a.tracker && !wins.length ? `<div class="q"><button class="primary" data-act="trackerOn">${t.trackerOn}</button></div>` : '';
   const tracker = a.tw ? `<div class="trk"><div class="cap2">${t.trackerTitle}</div>${winHtml(a.tw)}${trackerSettingsHtml(a)}</div>` : '';
   return `<div class="card" data-id="${esc(a.id)}">
-    <div class="head"><span class="badge p-${esc(a.provider)}">${NAMES[a.provider]}</span><b>${esc(a.label)}</b>
+    <div class="head"><span class="badge p-${esc(a.provider)}">${NAMES[a.provider]}</span><b>${esc(a.label)}</b>${a.linked ? `<span class="chip">● ${t.linked}</span>` : ''}
       <div class="btns">${buttons}</div>
       ${sub ? `<small>${esc(sub)}</small>` : ''}</div>
     ${err}${cookie}${wins.map(winHtml).join('')}${note}${loading}${trackerOn}${tracker}
@@ -251,8 +273,30 @@ function openCookie(id) {
     <div class="cnote">${t.cookieNote}</div>`;
   $('#connect').classList.remove('hidden');
 }
+// ---- browser-extension dialog (pairing code for the optional desktop link) ----
+let connectId = null;
+async function openConnect(id) {
+  const a = state.accounts.find(x => x.id === id); if (!a) return;
+  connectId = id;
+  const t = T(), name = NAMES[a.provider];
+  $('#cTitle').textContent = t.extTitle.replace('{service}', name);
+  const p = await api.pairing(id);
+  const code = p && p.code
+    ? `<textarea id="code" readonly spellcheck="false">${esc(p.code)}</textarea><button data-c="copy" id="copyBtn">${t.copyCode}</button>`
+    : `<div class="err">${t.portBusy}</div>`;
+  $('#cBody').innerHTML = `<ol class="steps">
+    <li><div>${esc(t.extStep1.replace('{service}', name))}</div><button data-c="signinBrowser">${t.signInBrowser}</button></li>
+    <li><div>${esc(t.extStep2)}</div><button data-c="folder">${t.openFolder}</button></li>
+    <li><div>${esc(t.extStep3)}</div>${code}</li></ol>
+    <div class="cnote">${t.extNote}</div>`;
+  $('#connect').classList.remove('hidden');
+}
+
 $('#cBody').addEventListener('click', async e => {
   const b = e.target.closest('button[data-c]'); if (!b) return;
+  if (b.dataset.c === 'signinBrowser') return api.openInBrowser(connectId);
+  if (b.dataset.c === 'folder') return api.openExtensionFolder();
+  if (b.dataset.c === 'copy') { api.copy($('#code').value); b.textContent = T().copied; return; }
   if (b.dataset.c === 'browser') return api.openInBrowser(cookieId);
   const t = T(), msg = $('#cMsg');
   const r = await api.setCookies(cookieId, $('#cookieIn').value);
@@ -292,6 +336,7 @@ $('#list').addEventListener('click', e => {
   if (act === 'signin' || act === 'site') api.signIn(id);
   else if (act === 'refresh') api.refresh(id);
   else if (act === 'cookie') openCookie(id);
+  else if (act === 'ext') openConnect(id);
   else if (act === 'remove') { if (confirm(T().confirmRemove)) api.remove(id); }
   else if (act === 'trackerOn') { openCards.add(id); api.trackerEnable(id); }
   else if (act === 'trackerOff') api.trackerDisable(id);

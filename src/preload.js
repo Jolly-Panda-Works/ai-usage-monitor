@@ -10,6 +10,8 @@ contextBridge.exposeInMainWorld('api', {
   openInBrowser: id => inv('account:browser', id),
   refresh: id => inv('account:refresh', id),
   refreshAll: () => inv('refresh:all'),
+  pairing: id => inv('account:pairing', id),
+  openExtensionFolder: () => inv('ext:open'),
   setCookies: (id, input) => inv('account:cookies', { id, input }),
   trackerEnable: id => inv('tracker:enable', id),
   trackerDisable: id => inv('tracker:disable', id),
