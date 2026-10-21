@@ -5,7 +5,7 @@ Only the latest release receives fixes.
 
 ## Reporting a vulnerability
 Please **do not** open a public issue. Use GitHub's private reporting:
-<https://github.com/Jolly-Panda-Works/AIUsageMonitor/security/advisories/new>
+<https://github.com/Jolly-Panda-Works/ai-usage-monitor/security/advisories/new>
 
 Include steps to reproduce and the impact. You will get a response as soon as possible.
 

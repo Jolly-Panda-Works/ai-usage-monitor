@@ -70,13 +70,13 @@ function winHtml(w) {
   const t = T();
   const used = Math.min(100, Math.max(0, w.usedPct || 0));
   const cls = used < 70 ? 'ok' : used < 90 ? 'warn' : 'bad';
-  const counts = w.limit != null ? ` (${num(w.used)}/${w.limit})` : '';
+  const counts = w.limit != null ? ` (<bdi>${num(w.used)}/${w.limit}</bdi>)` : '';
   let reset = `<span>${t.resetUnknown}</span>`;
   if (w.resetsAt) {
     const label = used >= 100 ? t.availableIn : t.resetsIn;
-    reset = `<span>${label}: <b data-reset="${w.resetsAt}"></b></span><span>${new Date(w.resetsAt).toLocaleString(locale())}</span>`;
+    reset = `<span>${label}: <b data-reset="${w.resetsAt}"></b></span><span><bdi>${new Date(w.resetsAt).toLocaleString(locale())}</bdi></span>`;
   }
-  return `<div class="win"><div class="rowt"><span>${esc(winLabel(w.label))}</span><span>${t.used}: <b>${num(used)}%</b> · ${t.left}: <b>${num(100 - used)}%</b>${counts}</span></div>
+  return `<div class="win"><div class="rowt"><span>${esc(winLabel(w.label))}</span><span>${t.used}: <b><bdi>${num(used)}%</bdi></b> · ${t.left}: <b><bdi>${num(100 - used)}%</bdi></b>${counts}</span></div>
   <div class="track"><div class="fill ${cls}" style="width:${used}%"></div></div><div class="meta">${reset}</div></div>`;
 }
 
@@ -127,7 +127,7 @@ function render() {
       ${d.note && t[d.note] ? `<div class="note">${t[d.note]}</div>` : ''}
       ${!a.data ? `<div class="note">${t.loading}</div>` : ''}
       ${manualHtml(a)}
-      ${d.updatedAt ? `<div class="upd">${t.updated}: ${new Date(d.updatedAt).toLocaleTimeString(locale())}</div>` : ''}
+      ${d.updatedAt ? `<div class="upd">${t.updated}: <bdi>${new Date(d.updatedAt).toLocaleTimeString(locale())}</bdi></div>` : ''}
     </div>`;
   }).join('');
   tick();

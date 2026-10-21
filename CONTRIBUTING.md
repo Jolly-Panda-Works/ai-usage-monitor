@@ -4,8 +4,8 @@ Thanks for helping! Please follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Getting started
 ```
-git clone https://github.com/Jolly-Panda-Works/AIUsageMonitor.git
-cd AIUsageMonitor
+git clone https://github.com/Jolly-Panda-Works/ai-usage-monitor.git
+cd ai-usage-monitor
 npm install
 npm start
 ```
@@ -26,3 +26,6 @@ Requirements: Node.js 20+, Windows (the packaged app targets Windows; developmen
 - Never commit cookies, tokens, e-mails or screenshots that show them.
 - Update `CHANGELOG.md` for user-facing changes.
 - CI runs a syntax check; please also run the app once with `npm start`.
+
+## Releases & versions
+Pushes to `main` build and publish a release automatically. The version is `MAJOR.MINOR.<build number>`; to start a new line, change `MAJOR.MINOR` in `package.json` (the patch part is overwritten by CI). Docs-only changes (`*.md`, `docs/`) don't trigger a build.

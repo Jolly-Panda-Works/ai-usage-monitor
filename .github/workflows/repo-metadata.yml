@@ -1,0 +1,24 @@
+name: Set repository About and topics
+
+# One-time / on-demand: sets the repo description, website and topics.
+# Needs a repository secret REPO_ADMIN_TOKEN: a fine-grained personal access token
+# for this repo with "Administration: Read and write" permission.
+on:
+  workflow_dispatch:
+
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update About and topics
+        env:
+          GH_TOKEN: ${{ secrets.REPO_ADMIN_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then echo "Missing secret REPO_ADMIN_TOKEN"; exit 1; fi
+          gh repo edit "$GITHUB_REPOSITORY" \
+            --description "Windows app that shows remaining usage and reset times for all your Claude, ChatGPT, Gemini and Figma accounts in one place." \
+            --homepage "https://useffarahmand.com" \
+            --add-topic ai --add-topic claude --add-topic chatgpt --add-topic gemini --add-topic figma \
+            --add-topic usage-monitor --add-topic token-usage --add-topic rate-limit \
+            --add-topic electron --add-topic windows --add-topic desktop-app \
+            --add-topic productivity --add-topic open-source --add-topic javascript

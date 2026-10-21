@@ -3,6 +3,14 @@
 All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [Unreleased]
+### Added
+- Automatic build and GitHub Release on every push to `main`; version is bumped automatically (`MAJOR.MINOR.<build number>`).
+- README screenshots (`docs/`) and a workflow to set the repository About and topics.
+### Fixed
+- Build no longer fails when GitHub's artifact storage quota is full: the Release is now the primary output and artifacts are only uploaded for dev builds (non-fatal).
+- Percentages, counts and dates display in the correct order in the Persian (RTL) interface.
+
 ## [1.1.0] - 2026-10-21
 ### Added
 - New dark-and-orange interface with sidebar, account filters, Settings and About dialog.

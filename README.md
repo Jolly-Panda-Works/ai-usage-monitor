@@ -4,13 +4,17 @@
 
 **See how much of your Claude, ChatGPT, Gemini and Figma limits you have left — and exactly when they reset — for every account, in one window.**
 
-[![Build](https://github.com/Jolly-Panda-Works/AIUsageMonitor/actions/workflows/build.yml/badge.svg)](https://github.com/Jolly-Panda-Works/AIUsageMonitor/actions/workflows/build.yml)
-[![Latest release](https://img.shields.io/github/v/release/Jolly-Panda-Works/AIUsageMonitor?display_name=tag&color=F97316)](https://github.com/Jolly-Panda-Works/AIUsageMonitor/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/Jolly-Panda-Works/AIUsageMonitor/total?color=F97316)](https://github.com/Jolly-Panda-Works/AIUsageMonitor/releases)
+[![Build](https://github.com/Jolly-Panda-Works/ai-usage-monitor/actions/workflows/build.yml/badge.svg)](https://github.com/Jolly-Panda-Works/ai-usage-monitor/actions/workflows/build.yml)
+[![Latest release](https://img.shields.io/github/v/release/Jolly-Panda-Works/ai-usage-monitor?display_name=tag&color=F97316)](https://github.com/Jolly-Panda-Works/ai-usage-monitor/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/Jolly-Panda-Works/ai-usage-monitor/total?color=F97316)](https://github.com/Jolly-Panda-Works/ai-usage-monitor/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)](#download-and-install-windows)
 
-[Download](https://github.com/Jolly-Panda-Works/AIUsageMonitor/releases/latest) · [Report a bug](https://github.com/Jolly-Panda-Works/AIUsageMonitor/issues/new?template=bug_report.yml) · [Request a feature](https://github.com/Jolly-Panda-Works/AIUsageMonitor/issues/new?template=feature_request.yml)
+[Download](https://github.com/Jolly-Panda-Works/ai-usage-monitor/releases/latest) · [Report a bug](https://github.com/Jolly-Panda-Works/ai-usage-monitor/issues/new?template=bug_report.yml) · [Request a feature](https://github.com/Jolly-Panda-Works/ai-usage-monitor/issues/new?template=feature_request.yml)
+
+![AI Usage Monitor — usage overview](docs/screenshot-1-overview.png)
+
+*Screenshots in this README use demo data.*
 
 ## Why?
 If you use several AI accounts you constantly wonder: *which one still has quota, and when does the other one come back?* AI Usage Monitor answers that at a glance, with live countdowns and a Windows notification when an exhausted account becomes available again.
@@ -23,6 +27,16 @@ If you use several AI accounts you constantly wonder: *which one still has quota
 - Dark-and-orange interface, **English and Persian (RTL)**.
 - No telemetry; nothing leaves your PC except requests to the services you connect. See [PRIVACY.md](PRIVACY.md).
 
+## Screenshots
+| | |
+| --- | --- |
+| ![Overview](docs/screenshot-1-overview.png) | ![Claude accounts](docs/screenshot-2-claude.png) |
+| **Overview** — every account, every limit window | **Filter** by service (here: two Claude accounts) |
+| ![Manual counter](docs/screenshot-3-manual.png) | ![Persian RTL](docs/screenshot-4-persian.png) |
+| **Manual counter** for Gemini / Figma | **Persian (RTL)** interface |
+
+![Settings and About](docs/screenshot-5-settings.png)
+
 ## Supported services
 | Service | How usage is read | Notes |
 | --- | --- | --- |
@@ -31,10 +45,10 @@ If you use several AI accounts you constantly wonder: *which one still has quota
 | **Gemini** | Manual counter | No public usage API for personal accounts |
 | **Figma** | Manual counter | No public usage API for personal accounts |
 
-> Claude and ChatGPT read **undocumented** website endpoints. They can change without notice; if one breaks, please [open an issue](https://github.com/Jolly-Panda-Works/AIUsageMonitor/issues/new?template=bug_report.yml). Results are percentages as reported by the service, not raw token counts.
+> Claude and ChatGPT read **undocumented** website endpoints. They can change without notice; if one breaks, please [open an issue](https://github.com/Jolly-Panda-Works/ai-usage-monitor/issues/new?template=bug_report.yml). Results are percentages as reported by the service, not raw token counts.
 
 ## Download and install (Windows)
-1. Open the [**Releases**](https://github.com/Jolly-Panda-Works/AIUsageMonitor/releases/latest) page.
+1. Open the [**Releases**](https://github.com/Jolly-Panda-Works/ai-usage-monitor/releases/latest) page.
 2. Download `AI-Usage-Monitor-Setup-<version>.exe` (installer) or `AI-Usage-Monitor-Portable-<version>.exe` (no install).
 3. Run it. Press **Add account**, choose a service, sign in, and close the sign-in window.
 
@@ -45,20 +59,22 @@ If you use several AI accounts you constantly wonder: *which one still has quota
 ## Run from source
 Requirements: **Node.js 20+**.
 ```
-git clone https://github.com/Jolly-Panda-Works/AIUsageMonitor.git
-cd AIUsageMonitor
+git clone https://github.com/Jolly-Panda-Works/ai-usage-monitor.git
+cd ai-usage-monitor
 npm install
 npm start
 ```
 
 ## Build the installer yourself
-**GitHub Actions (recommended).** Push to `main` — the workflow builds on `windows-latest` and attaches the `.exe` files to the run. Push a tag (`git tag v1.1.0 && git push --tags`) to also publish a GitHub Release with `SHA256SUMS.txt`.
+**GitHub Actions (recommended).** Every push to `main` builds the app on `windows-latest`, bumps the version automatically and publishes a GitHub Release (no Actions artifact storage needed) with the installer, the portable `.exe` and `SHA256SUMS.txt`. Documentation-only pushes (`*.md`, `docs/`) don't trigger a build.
+
+**Versioning.** The version is `MAJOR.MINOR.<build number>` — `MAJOR.MINOR` come from `package.json` (change them there to start a new line, e.g. `1.2.0`); the build number is added by CI and shown in the app header and Settings → About. Pushing a tag `vX.Y.Z` publishes exactly that version.
 
 **Locally on Windows.** `npm install && npm run dist` → files appear in `dist/`.
 
 ## Project structure
 ```
-AIUsageMonitor/
+ai-usage-monitor/
 ├── src/
 │   ├── main.js          # Electron main process: windows, sessions, refresh timer
 │   ├── preload.js       # safe bridge to the UI
@@ -67,7 +83,9 @@ AIUsageMonitor/
 │   ├── index.html
 │   └── styles.css
 ├── assets/              # logo.svg / logo.png / icon.ico
-├── .github/             # CI, release workflow, issue & PR templates, Dependabot
+├── docs/                # README screenshots (demo data)
+├── tools/set-version.js # CI: decides the build version
+├── .github/             # build/release + CI workflows, issue & PR templates, Dependabot
 ├── CHANGELOG.md  CONTRIBUTING.md  CODE_OF_CONDUCT.md
 ├── SECURITY.md  PRIVACY.md  CODE_SIGNING.md  LICENSE
 └── package.json
