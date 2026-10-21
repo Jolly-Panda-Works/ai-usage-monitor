@@ -3,9 +3,9 @@
 AI Usage Monitor runs entirely on your computer.
 
 - **No telemetry, no analytics, no server of ours.**
-- **No passwords or cookies are stored or read by the app.** You sign in to Claude / ChatGPT in your own browser. The Connector extension calls the services' usage endpoints *inside your browser* (as the website itself does) and sends only the resulting numbers — percentage used, reset time, plan name, e-mail address shown for the account — to the desktop app.
-- **Local-only delivery.** The app listens on `127.0.0.1` (ports 47821–47825) and accepts only requests that carry the random per-account token created in the app. It is not reachable from other computers.
-- **Stored data** (`%APPDATA%\AI Usage Monitor`): `accounts.json` (account labels, per-account pairing tokens, last usage numbers, manual counters, language) and a copy of the extension files. Removing an account in the app deletes its token, so the extension's reports for it are rejected.
+- **No passwords are seen or stored.** You sign in to Claude / ChatGPT inside the app's sign-in window, exactly like in a browser. Like a browser profile, the app keeps the session cookies those sites set — one separate, isolated session per account — in its data folder (`%APPDATA%\AI Usage Monitor`). If you use the optional *cookie* sign-in, the cookie you paste is stored the same way, in that account's own session only.
+- **Who the app talks to:** only the services you added (`claude.ai`, `chatgpt.com`), to read the usage the website itself shows you, and GitHub Releases to check for updates (installer build only). Usage numbers are never sent anywhere else.
+- **Stored data** (`%APPDATA%\AI Usage Monitor`): `accounts.json` (account labels, last usage numbers, Free-quota tracker values, language, refresh interval) and the per-account sessions. Removing an account in the app deletes its session.
 - **Updates:** the installer version contacts GitHub Releases to look for new versions. The portable build does not.
 
-To erase everything, remove the accounts in the app, remove the extension from your browser and delete the data folder.
+To erase everything, remove the accounts in the app and delete the data folder.

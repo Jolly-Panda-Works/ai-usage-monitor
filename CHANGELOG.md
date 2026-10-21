@@ -4,6 +4,18 @@ All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
 ## [Unreleased]
+## [1.3.0]
+### Changed
+- **No browser extension any more.** Claude and ChatGPT accounts sign in inside the app again (separate, isolated session per account) and usage is read from that session.
+- The message for accounts that return no usage meters (typically Free accounts) now explains why and points to the new tracker.
+- Restored the auto-refresh interval setting and a *Refresh all* button.
+### Added
+- **Free-plan quota tracker** for every service: unit (tokens / messages / credits), limit, used, remaining, percentage and a live reset countdown; session windows (start with first use, 5 h by default) and fixed windows (daily / monthly); quick `+1K / +10K / +100K` buttons; *Start window now*; notification when a quota resets.
+- Cookie sign-in as an alternative when Google/SSO sign-in is blocked inside the sign-in window.
+- Cloudflare-check detection with a clear message.
+### Removed
+- Connector browser extension, the local `127.0.0.1` bridge and pairing codes; the extension zip is no longer attached to releases.
+- Old manual counters (Gemini / Figma) are migrated automatically into the new tracker.
 ## [1.2.0]
 ### Changed
 - **Accounts are now signed in through your own browser** (Chrome / Edge / Brave) instead of an embedded window. Claude and ChatGPT usage is read by the new **Connector extension** and delivered to the app over a token-protected local connection (`127.0.0.1`).
