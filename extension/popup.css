@@ -45,3 +45,7 @@ summary{cursor:pointer;color:var(--muted)}
 .link{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin-top:8px}
 .link .t{flex:1;min-width:0}.link small{display:block;color:var(--muted);margin-top:2px}
 .good{color:var(--ok)}.bad-t{color:#ff8f8f}
+
+.promo{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#2a1708,#1f1611);border:1px solid #5a3413;border-radius:12px;padding:10px 12px;margin:2px 0 8px}
+.promo img{width:34px;height:34px}.promo .t{flex:1;font-size:12px;line-height:1.5}.promo b{color:var(--orange)}
+.feat{margin:6px 0 4px;padding-inline-start:18px;color:#d9ccc3;font-size:12px;line-height:1.7}

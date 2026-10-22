@@ -152,7 +152,11 @@ const ACTIONS = {
   }
 };
 
-chrome.runtime.onInstalled.addListener(() => boot(true));
+chrome.runtime.onInstalled.addListener(d => {
+  boot(true);
+  // First install: introduce the extension and the desktop app.
+  if (d && d.reason === 'install' && chrome.tabs) chrome.tabs.create({ url: chrome.runtime.getURL('welcome.html') });
+});
 chrome.runtime.onStartup.addListener(() => boot(true));
 chrome.alarms.onAlarm.addListener(a => { if (a.name === 'sync') run(syncAll); });
 chrome.runtime.onMessage.addListener((msg, sender, send) => {

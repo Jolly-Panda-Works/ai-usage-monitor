@@ -6,36 +6,25 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
 ## [Unreleased]
 ## [1.4.0]
 ### Added
-- **Browser extension is back** (`extension/`), now also a **standalone monitor**: the popup lists every Claude / ChatGPT account the browser is signed in with (plan, e-mail, usage bars, reset countdowns), remembers accounts it has seen, lets you rename / remove them, switches between English and Persian (RTL), shows the highest usage on the toolbar badge and notifies when a limit resets. Refresh interval is configurable.
-- Optional **desktop link**: the **🧩 Extension** button on an account card shows a pairing code; the extension then also reports to the app over the token-protected `127.0.0.1` bridge. A *Linked* chip appears on the card; fresh extension data is kept when the in-app session is not signed in.
-- The extension zip is attached to releases again.
+- **Browser extension is back, and better** (`extension/`, v1.5.0): a dashboard popup of every Claude / ChatGPT account the browser is signed in with (usage bars, reset countdowns, rename/remove, English/Persian), toolbar badge, reset notifications — works **on its own**, and can optionally report to the desktop app.
+- The extension introduces the desktop app: a **welcome page** on first install, an *About the desktop app* section and a download banner in the popup.
+- Desktop app: connect with the **browser extension**, the **official app login**, a **browser cookie**, or a **Free quota tracker** (for accounts without usage meters) — four tabs in the Connect dialog; *Open extension folder* installs the extension files.
+- Chrome Web Store kit: step-by-step guide (EN / FA), ready-to-paste listing and permission texts, 1280×800 screenshots, 440×280 and 1400×560 promo tiles (`store/`, `docs/`).
+- Release now also contains `AI-Usage-Monitor-Extension-<version>.zip`.
 ### Changed
-- In-app sign-in and the cookie sign-in stay as they were in 1.3.0 — the extension is an addition, not a replacement.
-### Removed
-- The accidentally committed `ai-usage-monitor.zip` snapshot (zip files are now git-ignored).
+- Free-account hint: “No usage meters came back” now points to the free quota tracker.
+
 ## [1.3.0]
 ### Changed
-- **No browser extension any more.** Claude and ChatGPT accounts sign in inside the app again (separate, isolated session per account) and usage is read from that session.
-- The message for accounts that return no usage meters (typically Free accounts) now explains why and points to the new tracker.
-- Restored the auto-refresh interval setting and a *Refresh all* button.
+- **No browser extension and no embedded sign-in.** Accounts connect through the official app login (Claude Code `.credentials.json` / Codex CLI `auth.json`, which sign in via your own browser) or a pasted browser cookie.
+- Usage responses are now parsed generically, so “No usage data came back” is much less likely; every Claude organisation is tried.
 ### Added
-- **Free-plan quota tracker** for every service: unit (tokens / messages / credits), limit, used, remaining, percentage and a live reset countdown; session windows (start with first use, 5 h by default) and fixed windows (daily / monthly); quick `+1K / +10K / +100K` buttons; *Start window now*; notification when a quota resets.
-- Cookie sign-in as an alternative when Google/SSO sign-in is blocked inside the sign-in window.
-- Cloudflare-check detection with a clear message.
-### Removed
-- Connector browser extension, the local `127.0.0.1` bridge and pairing codes; the extension zip is no longer attached to releases.
-- Old manual counters (Gemini / Figma) are migrated automatically into the new tracker.
-## [1.2.0]
-### Changed
-- **Accounts are now signed in through your own browser** (Chrome / Edge / Brave) instead of an embedded window. Claude and ChatGPT usage is read by the new **Connector extension** and delivered to the app over a token-protected local connection (`127.0.0.1`).
-- Removed the auto-refresh interval setting (the extension reports every minute).
-### Added
-- Connector extension (`extension/`), attached to every release as a zip.
-- In-app automatic updates (installer build) via GitHub Releases; **Settings → About** shows update status. Every build gets a higher version, so updates install over the previous version.
-- Automatic build and GitHub Release on every push to `main`; version is `MAJOR.MINOR.<build number>`.
-- README screenshots (`docs/`), single-instance lock, workflow to set the repository About and topics.
+- **Diagnostics** on each card (requests + response *structure*, no values) with a copy button.
+- Clear error messages (expired login, missing file, Cloudflare, …); auto-refresh interval is back in Settings.
+- In-app automatic updates (installer build) via GitHub Releases; version `MAJOR.MINOR.<build number>` is bumped automatically so updates install over each other.
+- Automatic build and GitHub Release on every push to `main`; README screenshots; workflow to set the repository About and topics.
 ### Fixed
-- Build no longer fails when GitHub's artifact storage quota is full: the Release is the primary output; artifacts are uploaded only for dev builds (non-fatal).
+- Build no longer fails when GitHub's artifact storage quota is full (Release is the primary output).
 - Percentages, counts and dates display in the correct order in the Persian (RTL) interface.
 
 ## [1.1.0] - 2026-10-21

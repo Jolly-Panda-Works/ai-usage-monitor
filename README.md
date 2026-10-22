@@ -2,7 +2,7 @@
 
 # AI Usage Monitor
 
-**See how much of your Claude, ChatGPT, Gemini and Figma limits you have left — and exactly when they reset — for every account, in one window.**
+**See how much of your Claude, ChatGPT, Gemini and Figma limits you have left — and exactly when they reset — for every account, in one window. Plus a browser extension that shows the same right in Chrome.**
 
 [![Build](https://github.com/Jolly-Panda-Works/ai-usage-monitor/actions/workflows/build.yml/badge.svg)](https://github.com/Jolly-Panda-Works/ai-usage-monitor/actions/workflows/build.yml)
 [![Latest release](https://img.shields.io/github/v/release/Jolly-Panda-Works/ai-usage-monitor?display_name=tag&color=F97316)](https://github.com/Jolly-Panda-Works/ai-usage-monitor/releases/latest)
@@ -14,66 +14,67 @@
 
 ![AI Usage Monitor — usage overview](docs/screenshot-1-overview.png)
 
-*Screenshots in this README use demo data and may not show the newest screens.*
+*Screenshots in this README use demo data.*
 
 ## Why?
-If you use several AI accounts you constantly wonder: *which one still has quota, and when does the other one come back?* AI Usage Monitor answers that at a glance, with live countdowns and a Windows notification when an exhausted account becomes available again.
+If you use several AI accounts you constantly wonder: *which one still has quota, and when does the other one come back?* AI Usage Monitor answers that at a glance, with live countdowns and a notification when an exhausted account becomes available again.
+
+## What's in this repo
+| Part | What it is |
+| --- | --- |
+| **Desktop app** (`src/`) | Windows app: all accounts in one window, notifications, free quota tracker, automatic updates. |
+| **Browser extension** (`extension/`) | Chrome / Edge / Brave extension: shows your Claude and ChatGPT accounts, usage and resets in the browser — works on its own and can optionally report to the desktop app. |
 
 ## Features
-- Multiple accounts per service (e.g. several Claude accounts), each with its own isolated sign-in.
-- **Sign in inside the app** — nothing to install in your browser. If a site blocks sign-in inside embedded windows (e.g. “Continue with Google”), paste the session cookie instead.
-- **Browser extension (optional, works on its own):** its popup lists the Claude / ChatGPT accounts your browser is signed in with — usage bars, reset countdowns, plan, e-mail — remembers accounts it has seen, shows the highest usage on the toolbar badge and notifies when a limit resets. It can also report to the desktop app. English and Persian (RTL).
-- Used %, remaining % and a live **reset countdown** for every limit window the service reports (5-hour, weekly, …).
-- **Free-plan quota tracker** for every service: see used / remaining **tokens** (or messages, credits), the limit you know, and a live **reset countdown** — even when the service shows nothing for Free accounts.
-- Windows notification when a limit resets.
+- Multiple accounts per service (e.g. several Claude accounts).
+- **You never sign in inside the app.** Four ways to connect: the browser extension, the official app login (Claude Code / Codex CLI), a pasted browser cookie, or a free quota tracker.
+- Used %, remaining % and a live **reset countdown** for every limit window (5-hour, weekly, …).
+- Notification when a limit resets (Windows app and browser).
 - **Automatic updates:** every build gets a higher version number, so each update installs over the previous one — in the app or by running the new installer.
 - Dark-and-orange interface, **English and Persian (RTL)**.
-- No telemetry; nothing leaves your PC except requests to the services themselves. See [PRIVACY.md](PRIVACY.md).
+- No telemetry; nothing leaves your PC. See [PRIVACY.md](PRIVACY.md).
 
 ## Screenshots
 | | |
 | --- | --- |
-| ![Overview](docs/screenshot-1-overview.png) | ![Claude accounts](docs/screenshot-2-claude.png) |
-| **Overview** — every account, every limit window | **Filter** by service (two Claude accounts) |
-| ![Manual counter](docs/screenshot-3-manual.png) | ![Persian RTL](docs/screenshot-4-persian.png) |
-| **Quota counter** for Gemini / Figma | **Persian (RTL)** interface |
-| ![Settings and About](docs/screenshot-5-settings.png) | |
-| **Settings, About and updates** | |
+| ![Overview](docs/screenshot-1-overview.png) | ![Connect: browser extension](docs/screenshot-6-connect.png) |
+| **Overview** — every account, every limit window | **Connect** — browser extension |
+| ![Connect: official app](docs/screenshot-8-app.png) | ![Connect: cookie](docs/screenshot-7-cookie.png) |
+| **Connect** — official app login | **Connect** — browser cookie |
+| ![Free quota tracker](docs/screenshot-9-free.png) | ![Manual counter](docs/screenshot-3-manual.png) |
+| **Free quota tracker** for accounts without usage meters | **Counter** card with +1 / limit / reset |
+| ![Persian RTL](docs/screenshot-4-persian.png) | ![Settings and About](docs/screenshot-5-settings.png) |
+| **Persian (RTL)** interface | **Settings, About and updates** |
+
+### Browser extension
+| | |
+| --- | --- |
+| ![Extension popup](store/screenshot-1-popup.png) | ![Extension welcome page](store/screenshot-3-welcome.png) |
+| **Popup** — accounts, usage bars, resets | **Welcome page** — introduces the extension and the desktop app |
 
 ## How it works
-Each Claude / ChatGPT account gets its own private browser session **inside the app**. You sign in once in the sign-in window; from then on the app reads your usage from that session — the same way the website itself does — and shows it as percentages and countdowns. Your password is never seen or stored by the app; only the session cookies the website sets are kept (like a browser profile), separately for every account.
+Claude and ChatGPT have no public usage API for personal accounts. AI Usage Monitor therefore reads the same usage data their own pages show, using a login **you** created in your own browser or in the official command-line app. The Windows app polls (default every 5 minutes) or receives reports from the extension (every minute) and shows everything in one window.
 
 ## Connect an account
-1. Press **Add account**, choose **Claude** or **ChatGPT**, give it a name and press **Add account**. A sign-in window opens.
-2. Sign in there (e-mail code / password). Close the window — the card fills in within seconds. Press **Sign in** on a card any time to open the window again.
-3. **Google sign-in blocked?** Some sites refuse Google sign-in inside embedded windows. Press **Can’t sign in (e.g. Google)? Use a cookie** on the card, sign in in your normal browser, copy the session cookie (`sessionKey` for Claude, `__Secure-next-auth.session-token` for ChatGPT; DevTools → Application → Cookies) and paste it. It is stored only inside the app, for that account.
+Press **Add account**, pick the service, name it — the *Connect* dialog opens with four tabs:
 
-## Browser extension
-A Chromium extension (Chrome / Edge / Brave) lives in [`extension/`](extension/README.md) and is attached to every release as `AI-Usage-Monitor-Connector-<version>.zip`.
+**1. Browser extension.** Install the extension (Chrome / Edge / Brave), sign in to the service in that browser the way you always do, copy the code from the app and paste it in the extension's *Desktop app link*. The card shows **Linked** within a minute. The extension also works **without** the app — it lists every account it sees. Several accounts of one service? Use one browser profile per account and each profile's own code. Install: *Chrome Web Store* (once published) or *Open extension folder* → `chrome://extensions` → **Developer mode** → **Load unpacked**.
 
-- **Standalone:** click the toolbar icon to see your accounts and usage — no desktop app needed. Sign in to claude.ai / chatgpt.com in that browser and the account appears by itself; accounts you used before stay listed (greyed out) with their last numbers.
-- **With the desktop app:** on an account card press **🧩 Extension**, install the extension (*Open extension folder* → `chrome://extensions` → *Developer mode* → *Load unpacked*), then paste the code under *Desktop app link*. The extension then also sends its numbers to the app (local `127.0.0.1` only).
-- One browser profile = one signed-in account per service. For several accounts use a separate browser profile for each (every profile can have the extension).
+**2. Official app login.** Install the official command-line app and sign in — it opens *your own browser*: Claude → **Claude Code** (`claude`, then `/login`); ChatGPT → **Codex CLI** (`codex login`). The login file is detected automatically (`%USERPROFILE%\.claude\.credentials.json` / `%USERPROFILE%\.codex\auth.json`); press **Use this login**. **Second account?** Give the official app a separate config folder first — `set CLAUDE_CONFIG_DIR=C:\claude-2` or `set CODEX_HOME=C:\codex-2` — sign in again and use **Browse…**. The app only reads the token; it never changes the file. If the token expires, use Claude Code / Codex once or reconnect.
 
-**Gemini and Figma** have no usage API for personal accounts, so they use the quota tracker below; the *Open site* button opens the site in your browser.
+**3. Browser cookie.** Sign in on the website, press **F12 → Network**, reload, click any request to the site and copy the `cookie` request header value into the dialog. It stays in that account's private storage on your PC. If you get a *Cloudflare* error, also paste your browser's `User-Agent`.
 
-## Free accounts: tokens and reset time
-Free plans usually don’t publish exact numbers, and the websites often return no usage meters for them (the card then says so). For those accounts, turn on the **Free quota tracker** (it is on by default for Gemini and Figma, one click for Claude and ChatGPT):
+**4. Free quota tracker.** Free accounts usually have no usage meters. Set the limit and reset time on the card and press **+1** per use; the app counts down to the reset. **Gemini and Figma** always use this counter (no public usage API); **Open site** opens the website in your browser.
 
-- Pick the **unit** — tokens, messages, credits — and enter the **limit** you know (leave `0` if you don’t know it).
-- Add what you use with the quick buttons (`+1K`, `+10K`, `+100K` tokens …) or type the exact number.
-- **Session** windows (Claude and ChatGPT Free: a limit that resets a few hours after you start using it — 5 hours by default) start automatically with your first usage, or press **Start window now**. **Fixed** windows (daily / monthly quotas) repeat on a schedule.
-- You see *used*, *left*, the percentage and a live **“resets in …”** countdown, plus a Windows notification when a used-up quota resets.
-
-The tracker is a counter **you** keep — the services don’t report these numbers for Free accounts, so the app can’t read them automatically.
+**“No usage data came back”?** The service answered without limit fields the app recognises — typical for **Free** accounts (use the free quota tracker) or when an unofficial endpoint changed. For the official-app and cookie methods open **Diagnostics** on the card (request log + response *structure*, no values) and copy it into an issue.
 
 ## Supported services
-| Service | How usage is read | Notes |
+| Service | Ways to connect | Notes |
 | --- | --- | --- |
-| **Claude** | Sign-in session inside the app | 5-hour and weekly windows when the plan reports them; Free accounts → quota tracker |
-| **ChatGPT** | Sign-in session inside the app | Windows depend on your plan; Free accounts → quota tracker |
-| **Gemini** | Quota tracker | No public usage API for personal accounts |
-| **Figma** | Quota tracker | No public usage API for personal accounts |
+| **Claude** | Extension · Claude Code login · cookie · free tracker | 5-hour and weekly windows; several accounts |
+| **ChatGPT** | Extension · Codex CLI login · cookie · free tracker | Windows depend on your plan |
+| **Gemini** | Counter | No public usage API for personal accounts |
+| **Figma** | Counter | No public usage API for personal accounts |
 
 > Claude and ChatGPT use **undocumented** website endpoints. They can change without notice; if one breaks, please [open an issue](https://github.com/Jolly-Panda-Works/ai-usage-monitor/issues/new?template=bug_report.yml). Results are percentages as reported by the service, not raw token counts.
 
@@ -82,9 +83,14 @@ The tracker is a counter **you** keep — the services don’t report these numb
 2. Download `AI-Usage-Monitor-Setup-<version>.exe` (installer, **recommended**) or `AI-Usage-Monitor-Portable-<version>.exe` (no install, no auto-update).
 3. Run it, then follow [Connect an account](#connect-an-account).
 
-**Updating.** The installer version updates itself: the app checks GitHub Releases at start and every 6 hours, downloads new versions in the background and installs them when you quit (or press **Restart and update** in *Settings → About*). You can also simply run a newer installer — it installs over the old one and keeps your accounts and settings.
+**Updating.** The installer version updates itself: it checks GitHub Releases at start and every 6 hours, downloads new versions in the background and installs them when you quit (or press **Restart and update** in *Settings → About*). You can also simply run a newer installer — it installs over the old one and keeps your accounts and settings.
 
 > **SmartScreen warning?** The app is not code-signed yet. Click **More info → Run anyway**. Verify downloads with `SHA256SUMS.txt` — see [CODE_SIGNING.md](CODE_SIGNING.md).
+
+## Install the browser extension
+- **From the Chrome Web Store** — once published (see [docs/PUBLISH_EXTENSION.md](docs/PUBLISH_EXTENSION.md) for how to publish it).
+- **Manually** — in the desktop app: *Connect → Browser extension → Open extension folder*, or unzip `AI-Usage-Monitor-Extension-<version>.zip` from the release; then `chrome://extensions` → **Developer mode** → **Load unpacked**.
+- After updating the desktop app, press the reload icon on the extension card if the extension changed.
 
 ## Run from source
 Requirements: **Node.js 20+**.
@@ -96,22 +102,24 @@ npm start
 ```
 
 ## Build and release (GitHub Actions)
-Every push to `main` builds the app on `windows-latest`, sets the version automatically and publishes a GitHub Release with the installer, the portable `.exe`, the update metadata (`latest.yml`) and `SHA256SUMS.txt`. Documentation-only pushes (`*.md`, `docs/`) don't trigger a build. Releases do not use Actions artifact storage.
+Every push to `main` builds the app on `windows-latest`, sets the version automatically and publishes a GitHub Release with the installer, the portable `.exe`, the update metadata (`latest.yml`), the extension zip and `SHA256SUMS.txt`. Documentation-only pushes (`*.md`, `docs/`, `store/`) don't trigger a build. Releases do not use Actions artifact storage.
 
-**Versioning.** `MAJOR.MINOR.<build number>` — `MAJOR.MINOR` come from `package.json` (change them there to start a new line, e.g. `1.3.0`); the build number is added by CI and only ever increases, which is what lets every update install over the previous one. The version shows in the app header and *Settings → About*. Pushing a tag `vX.Y.Z` publishes exactly that version (it must be higher than the latest one). Build locally with `npm install && npm run dist` → files appear in `dist/`.
+**Versioning.** The app version is `MAJOR.MINOR.<build number>` — `MAJOR.MINOR` come from `package.json` (change them there to start a new line); the build number is added by CI and only ever increases, which is what lets every update install over the previous one. Pushing a tag `vX.Y.Z` publishes exactly that version (it must be higher than the latest one). **The extension has its own version** (`extension/manifest.json`): raise it by hand before each Chrome Web Store upload. Build locally with `npm install && npm run dist` → files appear in `dist/`.
 
 ## Project structure
 ```
 ai-usage-monitor/
 ├── src/
-│   ├── main.js          # Electron main process: windows, sessions, updater
-│   ├── preload.js       # safe bridge to the UI
-│   ├── providers.js     # service fetchers + Free quota tracker
-│   ├── renderer.js      # UI logic + English/Persian strings
-│   ├── index.html  styles.css
+│   ├── main.js          # Electron main process: windows, accounts, refresh timer, updater
+│   ├── bridge.js        # 127.0.0.1 receiver for the extension (token-protected)
+│   ├── fetchers.js      # official-app / cookie usage fetchers (generic parsing + diagnostics)
+│   ├── providers.js     # service metadata + manual counters
+│   ├── preload.js  renderer.js  index.html  styles.css
+├── extension/           # Chromium extension (popup dashboard, welcome page, optional desktop link)
+├── store/               # Chrome Web Store assets and ready-to-paste listing texts
 ├── assets/              # logo.svg / logo.png / icon.ico
-├── docs/                # README screenshots (demo data)
-├── tools/set-version.js # CI: decides the build version
+├── docs/                # README screenshots, extension publishing guide (EN / FA)
+├── tools/set-version.js # CI: decides the app build version
 ├── .github/             # build/release + CI workflows, issue & PR templates, Dependabot
 ├── CHANGELOG.md  CONTRIBUTING.md  CODE_OF_CONDUCT.md
 ├── SECURITY.md  PRIVACY.md  CODE_SIGNING.md  LICENSE
@@ -120,19 +128,20 @@ ai-usage-monitor/
 
 ## Limitations
 - Unofficial endpoints (Claude, ChatGPT) may break when the websites change.
-- Free accounts: the services don’t report tokens/messages left, so those numbers come from the tracker you keep.
-- Google / SSO sign-in may be blocked inside the sign-in window — use the cookie option.
-- Windows only for packaged builds; no code signing yet.
+- The browser must be running for the extension to report; the official-app login must be refreshed by that app now and then; cookies stop working when you sign out.
+- Gemini, Figma and Free accounts need manual counting.
+- Windows only for packaged desktop builds; no code signing yet.
 
 ## Troubleshooting
 | Problem | Fix |
 | --- | --- |
-| “Connected, but … returned no usage meters” | Usually a Free account: the service has no percentage meters for it. Turn on the **Free quota tracker** on the card. |
-| “Not signed in” | Press **Sign in** and log in inside the window (or use the cookie option). |
-| “Cloudflare asked for a check” | Press **Sign in** and complete the check in the window, then close it. |
-| Cookie accepted but still “Not signed in” | The cookie expired or was copied from another account — copy it again, or use the sign-in window. |
-| ChatGPT shows “no usage data for this plan” | Your plan may not expose usage; use the tracker, or open an issue with your plan type. |
-| “Windows protected your PC” | **More info → Run anyway**; see [CODE_SIGNING.md](CODE_SIGNING.md). |
+| Card says "Waiting for the browser…" | The browser is closed, the extension isn't linked, or the code was pasted for another account. Open the extension popup → *Desktop app link* shows the last status. |
+| Extension says "Desktop app is not running" | Start AI Usage Monitor; keep only one copy running (it uses local ports 47821–47825). |
+| "Not signed in" in the extension | Sign in to the service in that browser (profile); it updates within a minute. |
+| "The saved app login has expired" | Use Claude Code / Codex once so it refreshes its token, or press **Reconnect**. |
+| "Blocked by Cloudflare" | Use the extension or the official app login, or reconnect with the full `cookie` header **and** your browser's `User-Agent`. |
+| "No usage meters came back" | Usually a Free account → *Free quota tracker*. Otherwise copy **Diagnostics** into an issue. |
+| "Windows protected your PC" | **More info → Run anyway**; see [CODE_SIGNING.md](CODE_SIGNING.md). |
 
 ## Contributing
 Contributions are welcome — read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md). Vulnerabilities: see [SECURITY.md](SECURITY.md).

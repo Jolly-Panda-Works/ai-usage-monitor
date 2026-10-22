@@ -3,6 +3,10 @@
 const PROVIDERS = { claude: { name: 'Claude', login: 'https://claude.ai/login', site: 'https://claude.ai' },
                     chatgpt: { name: 'ChatGPT', login: 'https://chatgpt.com/auth/login', site: 'https://chatgpt.com' } };
 
+const APP_URL = 'https://github.com/Jolly-Panda-Works/ai-usage-monitor/releases/latest';
+const REPO_URL = 'https://github.com/Jolly-Panda-Works/ai-usage-monitor';
+const openUrl = url => (chrome.tabs ? chrome.tabs.create({ url }) : window.open(url));
+
 const I18N = {
   en: {
     refresh: 'Refresh now', settings: 'Settings', language: 'Language', interval: 'Refresh every (minutes)', notify: 'Notify when a limit has reset',
@@ -15,8 +19,14 @@ const I18N = {
     NO_PLAN_USAGE: 'Signed in, but the service returned no usage data for this plan — usually a Free account. The desktop app has a Free quota tracker.',
     w: { '5-hour': '5-hour window', 'Weekly': 'Weekly window', 'Weekly Opus': 'Weekly Opus', 'Weekly Sonnet': 'Weekly Sonnet', 'Quota': 'Quota' },
     hour: '-hour window', day: '-day window', d: 'd', h: 'h', m: 'm', s: 's', now: 'now',
-    desktop: 'Desktop app link (optional)', desktopHint: 'In the desktop app press “Extension” on an account, copy the code and paste it here. This browser then also reports to the app.',
-    connect: 'Connect', sendNow: 'Send now', badCode: 'This is not a valid code.', badCode2: 'This code is not supported.', waiting: 'Waiting for the first report…', removeLink: 'Remove'
+    desktop: 'Desktop app link (optional)', desktopHint: 'In the desktop app press “Connect” on an account, open the “Browser extension” tab, copy the code and paste it here. This browser then also reports to the app.',
+    connect: 'Connect', sendNow: 'Send now', badCode: 'This is not a valid code.', badCode2: 'This code is not supported.', waiting: 'Waiting for the first report…', removeLink: 'Remove',
+    about: 'About the AI Usage Monitor desktop app',
+    aboutText: 'A free, open-source Windows app that puts all your AI accounts in one window — with live reset countdowns and desktop notifications.',
+    aboutList: ['Claude, ChatGPT, Gemini and Figma — several accounts of each', 'Used / left and a countdown to every reset, plus a notification when a limit resets', 'Free quota tracker for accounts without usage meters', 'Sign in your own way: this extension, the official app login or a cookie', 'English and Persian, dark/orange UI, automatic updates, no telemetry'],
+    download: 'Download for Windows', github: 'GitHub', welcome: 'Show welcome page',
+    promo: 'All your AI accounts in one Windows window — <b>get the free desktop app</b>',
+    promoBtn: 'Download'
   },
   fa: {
     refresh: 'بروزرسانی همین الان', settings: 'تنظیمات', language: 'زبان', interval: 'بروزرسانی هر (دقیقه)', notify: 'اعلان هنگام ریست شدن محدودیت',
@@ -29,8 +39,14 @@ const I18N = {
     NO_PLAN_USAGE: 'وارد شده‌ای، ولی سرویس برای این پلن اطلاعات مصرف نداد؛ معمولاً اکانت Free همین‌طور است. اپ دسکتاپ «ردیاب سهمیه Free» دارد.',
     w: { '5-hour': 'بازه ۵ ساعته', 'Weekly': 'بازه هفتگی', 'Weekly Opus': 'هفتگی Opus', 'Weekly Sonnet': 'هفتگی Sonnet', 'Quota': 'سهمیه' },
     hour: ' ساعته', day: ' روزه', d: ' روز', h: ' ساعت', m: ' دقیقه', s: ' ثانیه', now: 'همین الان',
-    desktop: 'اتصال به برنامه دسکتاپ (اختیاری)', desktopHint: 'در برنامه دسکتاپ روی اکانت «افزونه» را بزن، کد را کپی کن و اینجا بچسبان. بعد از آن این مرورگر به اپ هم گزارش می‌دهد.',
-    connect: 'Connect', sendNow: 'ارسال همین الان', badCode: 'این کد معتبر نیست.', badCode2: 'این کد پشتیبانی نمی‌شود.', waiting: 'در انتظار اولین گزارش…', removeLink: 'حذف'
+    desktop: 'اتصال به برنامه دسکتاپ (اختیاری)', desktopHint: 'در برنامه دسکتاپ روی اکانت «اتصال» را بزن، تب «افزونه مرورگر» را باز کن، کد را کپی کن و اینجا بچسبان. بعد از آن این مرورگر به اپ هم گزارش می‌دهد.',
+    connect: 'اتصال', sendNow: 'ارسال همین الان', badCode: 'این کد معتبر نیست.', badCode2: 'این کد پشتیبانی نمی‌شود.', waiting: 'در انتظار اولین گزارش…', removeLink: 'حذف',
+    about: 'درباره‌ی اپ دسکتاپ AI Usage Monitor',
+    aboutText: 'یک اپ ویندوز رایگان و متن‌باز که همه‌ی اکانت‌های هوش مصنوعی‌ات را در یک پنجره نشان می‌دهد — با شمارش معکوس زنده‌ی ریست و اعلان دسکتاپ.',
+    aboutList: ['Claude، ChatGPT، Gemini و Figma — با چند اکانت از هرکدام', 'مصرف / باقی‌مانده و شمارش معکوس هر ریست، با اعلان هنگام ریست شدن', 'ردیاب سهمیه‌ی Free برای اکانت‌هایی که شمارنده‌ی مصرف ندارند', 'ورود به روش خودت: همین افزونه، ورود با اپ رسمی یا کوکی', 'فارسی و انگلیسی، رابط تیره/نارنجی، آپدیت خودکار، بدون ردیابی'],
+    download: 'دانلود برای ویندوز', github: 'گیت‌هاب', welcome: 'نمایش صفحه خوش‌آمد',
+    promo: 'همه‌ی اکانت‌های هوش مصنوعی‌ات در یک پنجره‌ی ویندوز — <b>اپ دسکتاپ رایگان را بگیر</b>',
+    promoBtn: 'دانلود'
   }
 };
 
@@ -130,6 +146,9 @@ function render() {
   $('#tSettings').textContent = t.settings; $('#tLang').textContent = t.language; $('#tInterval').textContent = t.interval; $('#tNotify').textContent = t.notify;
   $('#tDesktop').textContent = t.desktop; $('#tDesktopHint').textContent = t.desktopHint;
   $('#add').textContent = t.connect;
+  $('#tAbout').textContent = t.about; $('#tAboutText').textContent = t.aboutText;
+  const ul = $('#tAboutList'); ul.textContent = ''; t.aboutList.forEach(x => ul.append(h('li', { text: x })));
+  $('#dl').textContent = t.download; $('#gh').textContent = t.github; $('#wel').textContent = t.welcome;
   $('#lang').value = lang; $('#interval').value = String(data.settings.intervalMin); $('#notify').checked = !!data.settings.notify;
 
   const list = $('#accounts');
@@ -148,7 +167,18 @@ function render() {
   }
 
   renderLinks();
+  renderPromo();
   tick();
+}
+
+// Small banner introducing the desktop app until a desktop link has been set up.
+function renderPromo() {
+  const box = $('#promo'); box.textContent = '';
+  if (data.links.length) return;
+  const t = T(), txt = h('div', { class: 't' });
+  txt.innerHTML = t.promo;   // static, trusted translation string
+  box.append(h('div', { class: 'promo' }, h('img', { src: 'icons/icon48.png', alt: '' }), txt,
+    h('button', { class: 'primary tiny', text: t.promoBtn, onclick: () => openUrl(APP_URL) })));
 }
 
 function renderLinks() {
@@ -180,6 +210,9 @@ function decode(code) {
   return { provider: o.s, label: String(o.l || PROVIDERS[o.s].name).slice(0, 60), token: o.t, port: o.p };
 }
 
+$('#dl').onclick = () => openUrl(APP_URL);
+$('#gh').onclick = () => openUrl(REPO_URL);
+$('#wel').onclick = () => openUrl(chrome.runtime.getURL('welcome.html'));
 $('#add').onclick = async () => {
   $('#msg').textContent = '';
   try {

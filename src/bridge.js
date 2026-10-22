@@ -1,4 +1,4 @@
-// Local-only HTTP bridge (127.0.0.1) that receives usage reports from the browser Connector extension.
+// Local-only HTTP bridge (127.0.0.1) that receives usage reports from the browser extension.
 // Every request must carry the per-account token created in the app.
 const http = require('http');
 
@@ -50,7 +50,7 @@ function makeHandler({ findByToken, onUsage }) {
   };
 }
 
-// Resolves with the port in use, or null when every port is taken.
+// Resolves with { port, server }, or null when every port is taken.
 function start(deps) {
   const handler = makeHandler(deps);
   return new Promise(resolve => {
